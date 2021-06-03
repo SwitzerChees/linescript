@@ -42,11 +42,14 @@ public class SkriptRunner
                 String script = sb.toString();
                 if (script.trim().length() == 0)
                 {
-                    System.out.println("DONE");
+                    continue;
+                }
+                else if (script.trim().equals("exit()")) {
+                    System.out.println("Bye! 👋");
                     return;
                 }
                 Parser parser = new Parser(new Scanner(new StringReader(script)));
-                Symbol symbol = parser.debug_parse();
+                Symbol symbol = parser.parse();
                 Instruction instr = (Instruction) symbol.value;
                 Validator validator = new Validator();
                 instr.acceptVisitor(validator);

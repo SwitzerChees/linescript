@@ -53,9 +53,11 @@ COMMENT   = "//".*
 "+="    { return sym(ASSIGN_PLUS); }
 "-="    { return sym(ASSIGN_MINUS); }
 "*="    { return sym(ASSIGN_MUL); }
-"\="    { return sym(ASSIGN_DIVIDE); }
+"/="    { return sym(ASSIGN_DIVIDE); }
 
-[0-9]+  { return symVal(NUMBER); }
+[0-9]+                                  { return symVal(NUMBER); }
+[0-9]+.                                 { return symVal(NUMBER); }
+[0-9]+.[0-9]+                           { return symVal(NUMBER); }
 \"[a-zA-z0-9\s]*\"                      { return symVal(STRING); }
 ([:jletter:]|_)([:jletterdigit:]|_)*	{ return symVal(IDENTIFIER); }
 

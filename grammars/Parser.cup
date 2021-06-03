@@ -32,13 +32,13 @@ STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
 STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
             | SIMPLE_STATEMENT:ss {: RESULT = ss; :};
 SIMPLE_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
-                   |  NUMBER:n {: RESULT = InstructionConstant.integer(n); :};
-ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.integer(n)); :}
+                   |  NUMBER:n {: RESULT = InstructionConstant.number(n); :};
+ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN STRING:s SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
-                   | IDENTIFIER:i ASSIGN_PLUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.integer(n)); :}
-                   | IDENTIFIER:i ASSIGN_MINUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.integer(n)); :}
-                   | IDENTIFIER:i ASSIGN_MUL NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.integer(n)); :}
-                   | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.integer(n)); :};
+                   | IDENTIFIER:i ASSIGN_PLUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN_MINUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN_MUL NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
 
 END ::= 
      |  SEP
