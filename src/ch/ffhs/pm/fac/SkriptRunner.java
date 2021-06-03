@@ -47,7 +47,7 @@ public class SkriptRunner
                     return;
                 }
                 Parser parser = new Parser(new Scanner(new StringReader(script)));
-                Symbol symbol = parser.debug_parse();
+                Symbol symbol = parser.parse();
                 Instruction instr = (Instruction) symbol.value;
                 Validator validator = new Validator();
                 instr.acceptVisitor(validator);

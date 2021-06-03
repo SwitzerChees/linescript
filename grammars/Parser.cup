@@ -6,19 +6,21 @@ import ch.ffhs.pm.fac.instr.*;
 
 terminal PLUS, MINUS, TIMES, DIV, MOD, POW;
 terminal ASSIGN, LPAR, RPAR, SEP;
+terminal EQUAL, NOT_EQUAL, LESS_THAN, GREATER, LESS_EQUAL, GREATER_EQUAL;
 
 terminal String NUMBER;
-terminal String NAME;
+terminal String STRING;
+terminal String IDENTIFIER;
 
 non terminal Instruction SCRIPT;
 non terminal ArrayList<Instruction> ASSIGNMENT_LIST;
 non terminal Instruction ASSIGNMENT;
 non terminal Instruction SUM, PRODUCT, POWER, SIMPLE_TERM;
-non terminal ENDE;
+non terminal END;
 
 start with SCRIPT;
       
-SCRIPT ::= ASSIGNMENT_LIST:al SUM:s ENDE
+SCRIPT ::= ASSIGNMENT_LIST:al SUM:s END
                          {: RESULT = new InstructionScript(al, s); :}
                       ;
                
@@ -30,12 +32,12 @@ ASSIGNMENT_LIST ::=
                    :}
                 ;
                 
-ENDE ::= 
+END ::= 
      |  SEP
      ;
 
-ASSIGNMENT ::= NAME:n ASSIGN SUM:s SEP
-                {: RESULT = new InstructionSetVariable(n, s); :}
+ASSIGNMENT ::= IDENTIFIER:i ASSIGN SUM:s SEP
+                {: RESULT = new InstructionSetVariable(i, s); :}
               ;
            
        
@@ -65,8 +67,8 @@ POWER ::= SIMPLE_TERM:st
           {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, st, pp); :}
         ;
         
-SIMPLE_TERM ::= NAME:n
-                {: RESULT = new InstructionGetVariable(n); :}
+SIMPLE_TERM ::= IDENTIFIER:i
+                {: RESULT = new InstructionGetVariable(i); :}
              |  NUMBER:n
                 {: RESULT = InstructionConstant.integer(n); :}
              |  LPAR SUM:s RPAR

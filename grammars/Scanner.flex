@@ -40,11 +40,19 @@ COMMENT   = "//".*
 "%"     { return sym(MOD); }
 "**"    { return sym(POW); }
 ":="    { return sym(ASSIGN); }
-"("		{ return sym(LPAR); }
-")"		{ return sym(RPAR); }
+"("	   { return sym(LPAR); }
+")"	   { return sym(RPAR); }
+
+"="     { return sym(EQUAL); }
+"!="    { return sym(NOT_EQUAL); }
+"<"     { return sym(LESS_THAN); }
+">"     { return sym(GREATER); }
+"<="    { return sym(LESS_EQUAL); }
+">="    { return sym(GREATER_EQUAL); }
 
 [0-9]+  { return symVal(NUMBER); }
-([:jletter:]|_)([:jletterdigit:]|_)*	{return symVal(NAME); }
+\"[a-zA-z0-9\s]*\"                      {return symVal(STRING);}
+([:jletter:]|_)([:jletterdigit:]|_)*	{return symVal(IDENTIFIER); }
 
 {BREAK} { return sym(SEP); }
 {OPT_SPACE}	{ }
