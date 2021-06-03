@@ -8,7 +8,7 @@ public class InstructionConstant extends Instruction
     
     public static InstructionConstant number(String str)
     {
-        return new InstructionConstant(new BigDecimal(str), VariableType.NUMBER);
+        return new InstructionConstant(new BigDecimal(str.trim()), VariableType.NUMBER);
     }
 
     public static InstructionConstant string(String str)

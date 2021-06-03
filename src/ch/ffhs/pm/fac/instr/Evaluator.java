@@ -45,7 +45,6 @@ public class Evaluator implements InstructionVisitor<Object> {
             return context.get(instructionGetVariable.name);
         } else {
             throw new RuntimeException("Variable " + instructionGetVariable.name + " not initialized.");
-            // TODO spezifischere Exception
         }
     }
 
@@ -98,11 +97,47 @@ public class Evaluator implements InstructionVisitor<Object> {
             case MOD:
                 return new BigDecimal(left.toBigInteger().mod(right.toBigInteger()));
             case POW:
-                return left.pow(right.intValue()); // TODO overflow abfangen
+                return left.pow(right.intValue());
             default:
                 assert false;
                 return null;
         }
+    }
+
+    @Override
+    public Object visitConditionalStatement(InstructionConditionalStatement instructionCondExpr) {
+        Object left = instructionCondExpr.leftOperand.acceptVisitor(this);
+        Object right = instructionCondExpr.rightOperand.acceptVisitor(this);
+        if (!left.getClass().equals(right.getClass())) {
+            throw new RuntimeException(
+                    "The conditional statement do not have the same type of class on both sites left: "
+                            + left.getClass() + " right: " + right.getClass());
+        }
+        if (left instanceof BigDecimal) {
+            BigDecimal leftNumber = (BigDecimal) left;
+            BigDecimal rightNumber = (BigDecimal) right;
+            switch (instructionCondExpr.conditionalExpression) {
+                case EQUAL:
+                    return leftNumber.equals(rightNumber);
+                case NOT_EQUAL:
+                    return !leftNumber.equals(rightNumber);
+                case LESS_THAN:
+                    return leftNumber.compareTo(rightNumber) < 0;
+                case LESS_EQUAL:
+                    return leftNumber.compareTo(rightNumber) <= 0;
+                case GREATER:
+                    return leftNumber.compareTo(rightNumber) > 0;
+                case GREATER_EQUAL:
+                    return leftNumber.compareTo(rightNumber) >= 0;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Object visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -118,5 +153,4 @@ public class Evaluator implements InstructionVisitor<Object> {
         }
         return instructionScript.lastInstruction.acceptVisitor(this);
     }
-
 }

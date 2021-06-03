@@ -33,16 +33,24 @@ BREAK     = [\n\r]+
 COMMENT   = "//".*
 %%
 
-"+"     { return sym(PLUS); }
-"-"     { return sym(MINUS); }
-"*"     { return sym(TIMES); }
-"/"     { return sym(DIV); }
-"%"     { return sym(MOD); }
-"**"    { return sym(POW); }
-"("	   { return sym(LPAR); }
-")"	   { return sym(RPAR); }
+"if"    { return sym(IF); }
+"else"  { return sym(ELSE); }
+"func"  { return sym(FUNC); }
+"while" { return sym(WHILE); }
 
-"=="     { return sym(EQUAL); }
+":"     { return sym(TERMINATOR); }
+","     { return sym(SEPARATOR); }
+
+// "+"     { return sym(PLUS); }
+// "-"     { return sym(MINUS); }
+// "*"     { return sym(TIMES); }
+// "/"     { return sym(DIV); }
+// "%"     { return sym(MOD); }
+// "**"    { return sym(POW); }
+// "("	   { return sym(LPAR); }
+// ")"	   { return sym(RPAR); }
+
+"=="    { return sym(EQUAL); }
 "!="    { return sym(NOT_EQUAL); }
 "<"     { return sym(LESS_THAN); }
 ">"     { return sym(GREATER); }
@@ -55,9 +63,9 @@ COMMENT   = "//".*
 "*="    { return sym(ASSIGN_MUL); }
 "/="    { return sym(ASSIGN_DIVIDE); }
 
-[0-9]+                                  { return symVal(NUMBER); }
-[0-9]+.                                 { return symVal(NUMBER); }
-[0-9]+.[0-9]+                           { return symVal(NUMBER); }
+\+?-?[0-9]+                             { return symVal(NUMBER); }
+\+?-?[0-9]+\.                           { return symVal(NUMBER); }
+\+?-?[0-9]+\.[0-9]+                     { return symVal(NUMBER); }
 \"[a-zA-z0-9\s]*\"                      { return symVal(STRING); }
 ([:jletter:]|_)([:jletterdigit:]|_)*	{ return symVal(IDENTIFIER); }
 
