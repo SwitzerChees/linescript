@@ -1,0 +1,8 @@
+{
+    "version": "2.0.0",
+    "tasks": [{
+        "label": "compile",
+        "command": "ant main -buildfile lib/build.xml -lib lib/ -v",
+        "type": "shell"
+    }]
+}

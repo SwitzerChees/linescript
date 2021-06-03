@@ -1,0 +1,75 @@
+package ch.ffhs.pm.fac.parser;
+
+import java.util.ArrayList;
+import java_cup.runtime.*;
+import ch.ffhs.pm.fac.instr.*;
+
+terminal PLUS, MINUS, TIMES, DIV, MOD, POW;
+terminal ASSIGN, LPAR, RPAR, SEP;
+
+terminal String NUMBER;
+terminal String NAME;
+
+non terminal Instruction SCRIPT;
+non terminal ArrayList<Instruction> ASSIGNMENT_LIST;
+non terminal Instruction ASSIGNMENT;
+non terminal Instruction SUM, PRODUCT, POWER, SIMPLE_TERM;
+non terminal ENDE;
+
+start with SCRIPT;
+      
+SCRIPT ::= ASSIGNMENT_LIST:al SUM:s ENDE
+                         {: RESULT = new InstructionScript(al, s); :}
+                      ;
+               
+ASSIGNMENT_LIST ::=
+                   {:  RESULT = new ArrayList<Instruction>(); :}
+                |  ASSIGNMENT_LIST:al ASSIGNMENT:a 
+                   {:  RESULT = al;
+                       RESULT.add(a); 
+                   :}
+                ;
+                
+ENDE ::= 
+     |  SEP
+     ;
+
+ASSIGNMENT ::= NAME:n ASSIGN SUM:s SEP
+                {: RESULT = new InstructionSetVariable(n, s); :}
+              ;
+           
+       
+SUM ::= PRODUCT:p
+        {: RESULT = p; :}
+     |  MINUS PRODUCT:p
+        {: RESULT = new InstructionNegate(p); :}
+     |  SUM:s PLUS PRODUCT:p
+        {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, s, p); :}
+     |  SUM:s MINUS PRODUCT:p
+        {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, s, p); :}
+     ;
+     
+PRODUCT ::= POWER:pp
+            {: RESULT = pp; :}
+         |  PRODUCT:p TIMES POWER:pp
+            {: RESULT = new InstructionBinaryOperation(BinaryOperator.TIMES, p, pp); :}
+         |  PRODUCT:p DIV POWER:pp
+            {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, p, pp); :}
+         |  PRODUCT:p MOD POWER:pp
+            {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, p, pp); :}
+         ;
+                    
+POWER ::= SIMPLE_TERM:st
+          {: RESULT = st; :}
+        | SIMPLE_TERM:st POW POWER:pp
+          {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, st, pp); :}
+        ;
+        
+SIMPLE_TERM ::= NAME:n
+                {: RESULT = new InstructionGetVariable(n); :}
+             |  NUMBER:n
+                {: RESULT = InstructionConstant.integer(n); :}
+             |  LPAR SUM:s RPAR
+                {: RESULT = s; :}
+             ;    
+   
