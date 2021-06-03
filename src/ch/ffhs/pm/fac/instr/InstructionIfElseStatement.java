@@ -3,13 +3,13 @@ package ch.ffhs.pm.fac.instr;
 public class InstructionIfElseStatement extends Instruction
 {
    
-    final InstructionConditionalStatement conditionalStatement;
+    final Instruction conditionalStatement;
     
     final Instruction ifStatement;
 
     final Instruction elseStatement;
     
-    public InstructionIfElseStatement(InstructionConditionalStatement conditionalStatement, Instruction ifStatement, Instruction elseStatement)
+    public InstructionIfElseStatement(Instruction conditionalStatement, Instruction ifStatement, Instruction elseStatement)
     {
         this.conditionalStatement = conditionalStatement;
         this.ifStatement = ifStatement;

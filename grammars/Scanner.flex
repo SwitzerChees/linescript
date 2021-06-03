@@ -38,6 +38,9 @@ COMMENT   = "//".*
 "func"  { return sym(FUNC); }
 "while" { return sym(WHILE); }
 
+"true" { return sym(TRUE); }
+"false" { return sym(FALSE); }
+
 ":"     { return sym(TERMINATOR); }
 ","     { return sym(SEPARATOR); }
 

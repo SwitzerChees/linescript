@@ -136,7 +136,10 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement) {
-        // TODO Auto-generated method stub
+        Boolean conditionalStatement = (Boolean)instructionIfElseStatement.conditionalStatement.acceptVisitor(this);
+        if (conditionalStatement) {
+            return instructionIfElseStatement.ifStatement.acceptVisitor(this);
+        }
         return null;
     }
 

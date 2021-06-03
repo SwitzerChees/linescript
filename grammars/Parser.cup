@@ -6,7 +6,7 @@ import ch.ffhs.pm.fac.instr.*;
 
 terminal EQUAL, NOT_EQUAL, LESS_THAN, GREATER, LESS_EQUAL, GREATER_EQUAL;
 terminal ASSIGN, ASSIGN_PLUS, ASSIGN_MINUS, ASSIGN_MUL, ASSIGN_DIVIDE;
-terminal IF, ELSE, FUNC, WHILE, TERMINATOR, SEPARATOR, SEP;
+terminal IF, ELSE, FUNC, WHILE, TERMINATOR, SEPARATOR, TRUE, FALSE, SEP;
 
 terminal String NUMBER;
 terminal String STRING;
@@ -16,7 +16,7 @@ non terminal Instruction SCRIPT;
 non terminal END;
 
 non terminal ArrayList<Instruction> STATEMENT_LIST;
-non terminal Instruction STATEMENT, ASSIGN_STATEMENT, SIMPLE_STATEMENT;
+non terminal Instruction STATEMENT, ASSIGN_STATEMENT, BASIC_STATEMENT;
 non terminal Instruction IF_STATEMENT, ELSE_STATEMENT, CONDITIONAL_STATEMENT;
 
 start with SCRIPT;
@@ -27,12 +27,15 @@ STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
                  | STATEMENT_LIST:sl STATEMENT:s {: RESULT = sl; RESULT.add(s); :};
 
 STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
-            | SIMPLE_STATEMENT:ss {: RESULT = ss; :}
-            | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :};
+            | BASIC_STATEMENT:bs {: RESULT = bs; :}
+            | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
+            | IF_STATEMENT:is {: RESULT = is; :};
 
-SIMPLE_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
+BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                    |  NUMBER:n {: RESULT = InstructionConstant.number(n); :}
-                   |  STRING:s {: RESULT = InstructionConstant.string(s); :};
+                   |  STRING:s {: RESULT = InstructionConstant.string(s); :}
+                   |  TRUE {: RESULT = InstructionConstant.number("1"); :}
+                   |  FALSE {: RESULT = InstructionConstant.number("0"); :};
 
 ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN STRING:s SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
@@ -41,14 +44,16 @@ ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n SEP {: RESULT = new Instructio
                    | IDENTIFIER:i ASSIGN_MUL NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
 
-IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s SEP;
+IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s SEP {: RESULT = new InstructionIfElseStatement(ce, s, null); :}
+               | IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s ELSE_STATEMENT:es {: RESULT = new InstructionIfElseStatement(ce, s, es); :};
+ELSE_STATEMENT ::= ELSE TERMINATOR STATEMENT:s {: RESULT = s; :};
 
-CONDITIONAL_STATEMENT ::= SIMPLE_STATEMENT:ssl EQUAL SIMPLE_STATEMENT:ssr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, ssl, ssr); :}
-                        | SIMPLE_STATEMENT:ssl NOT_EQUAL SIMPLE_STATEMENT:ssr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, ssl, ssr); :}
-                        | SIMPLE_STATEMENT:ssl LESS_THAN SIMPLE_STATEMENT:ssr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, ssl, ssr); :}
-                        | SIMPLE_STATEMENT:ssl GREATER SIMPLE_STATEMENT:ssr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, ssl, ssr); :}
-                        | SIMPLE_STATEMENT:ssl LESS_EQUAL SIMPLE_STATEMENT:ssr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, ssl, ssr); :}
-                        | SIMPLE_STATEMENT:ssl GREATER_EQUAL SIMPLE_STATEMENT:ssr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, ssl, ssr); :};
+CONDITIONAL_STATEMENT ::= BASIC_STATEMENT:bsl EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, bsl, bsr); :}
+                        | BASIC_STATEMENT:bsl NOT_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, bsl, bsr); :}
+                        | BASIC_STATEMENT:bsl LESS_THAN BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, bsl, bsr); :}
+                        | BASIC_STATEMENT:bsl GREATER BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, bsl, bsr); :}
+                        | BASIC_STATEMENT:bsl LESS_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, bsl, bsr); :}
+                        | BASIC_STATEMENT:bsl GREATER_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, bsl, bsr); :};
 
 END ::= 
      |  SEP
