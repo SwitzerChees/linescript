@@ -12,24 +12,24 @@ import java.util.Map;
  * 
  * @author urs-martin
  */
-public class Evaluator implements InstructionVisitor<BigInteger>
+public class Evaluator implements InstructionVisitor<Object>
 {
     /** Eine Map mit Namen-Wert Paaren für Variable*/
-    private Map<String,BigInteger> context;
+    private Map<String, Object> context;
         
     /**
      * Erzeugt einen Evaluator mit leerem Context und leerer FunktionsLibrary.
      */
     public Evaluator()
     {
-        this(new HashMap<String,BigInteger>());
+        this(new HashMap<String,Object>());
     }
 
     /**
      * Erzeugt einen Evaluator
      * @param context Vordefinierte Variablenwerte
      */
-    public Evaluator(Map<String,BigInteger> context)
+    public Evaluator(Map<String,Object> context)
     {
         this.context = context;
     }
@@ -37,14 +37,14 @@ public class Evaluator implements InstructionVisitor<BigInteger>
     // Ohne weitere Kommentare: Auswertungsmethoden für alle Instruktionstypen.
     
     @Override
-    public BigInteger visitConstant(
+    public Object visitConstant(
             InstructionConstant instructionConstant)
     {
-        return (BigInteger) instructionConstant.value;
+        return instructionConstant.value;
     }
 
     @Override
-    public BigInteger visitGetVariable(
+    public Object visitGetVariable(
             InstructionGetVariable instructionGetVariable)
     {
         if (context.containsKey(instructionGetVariable.name))
@@ -59,10 +59,10 @@ public class Evaluator implements InstructionVisitor<BigInteger>
     }
 
     @Override
-    public BigInteger visitSetVariable(
+    public Object visitSetVariable(
             InstructionSetVariable instructionSetVariable)
     {
-        BigInteger evaluatedValue = instructionSetVariable.value.acceptVisitor(this);
+        Object evaluatedValue = instructionSetVariable.value.acceptVisitor(this);
         context.put(instructionSetVariable.name, evaluatedValue);
         return null;
     }
@@ -72,8 +72,8 @@ public class Evaluator implements InstructionVisitor<BigInteger>
     public BigInteger visitBinaryOperation(
             InstructionBinaryOperation instructionBinOp)
     {
-        BigInteger left = instructionBinOp.leftOperand.acceptVisitor(this);
-        BigInteger right = instructionBinOp.rightOperand.acceptVisitor(this);
+        BigInteger left =  (BigInteger)instructionBinOp.leftOperand.acceptVisitor(this);
+        BigInteger right = (BigInteger)instructionBinOp.rightOperand.acceptVisitor(this);
         switch (instructionBinOp.operator)
         {
             case PLUS:  return left.add(right);
@@ -90,12 +90,12 @@ public class Evaluator implements InstructionVisitor<BigInteger>
     public BigInteger visitNegation(
             InstructionNegate instructionNegate)
     {
-        BigInteger operand = instructionNegate.operand.acceptVisitor(this);
+        BigInteger operand = (BigInteger)instructionNegate.operand.acceptVisitor(this);
         return operand.negate();
     }
 
     @Override
-    public BigInteger visitScript(InstructionScript instructionScript)
+    public Object visitScript(InstructionScript instructionScript)
     {
         for (Instruction instr : instructionScript.assignments)
         {

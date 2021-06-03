@@ -1,6 +1,5 @@
 package ch.ffhs.pm.fac.instr;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 
 /**
@@ -18,7 +17,7 @@ public class Context
     private Context outerContext;
     
     /** Eigene Variable des Contexts. */
-    private HashMap<String,BigInteger> vars = new HashMap<String,BigInteger>();
+    private HashMap<String,Object> vars = new HashMap<String,Object>();
     
     public Context()
     {}
@@ -35,9 +34,9 @@ public class Context
      * @param name
      * @return Wert der Variablen oder null
      */
-    public BigInteger getValue(String name)
+    public Object getValue(String name)
     {
-        BigInteger result = vars.get(name);
+        Object result = vars.get(name);
         if (result == null && outerContext != null) return outerContext.getValue(name);
         return result;
     }
@@ -47,7 +46,7 @@ public class Context
      * @param name
      * @param value
      */
-    public void setValue(String name, BigInteger value)
+    public void setValue(String name, Object value)
     {
         if (changeValue(name, value))
         {
@@ -61,7 +60,7 @@ public class Context
      * @param newValue
      * @return true, falls Variable geändert wurde, false falls die Variable nicht existiert.
      */
-    public boolean changeValue(String name, BigInteger newValue)
+    public boolean changeValue(String name, Object newValue)
     {
         if (vars.containsKey(name))
         {

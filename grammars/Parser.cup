@@ -5,8 +5,9 @@ import java_cup.runtime.*;
 import ch.ffhs.pm.fac.instr.*;
 
 terminal PLUS, MINUS, TIMES, DIV, MOD, POW;
-terminal ASSIGN, LPAR, RPAR, SEP;
+terminal LPAR, RPAR, SEP;
 terminal EQUAL, NOT_EQUAL, LESS_THAN, GREATER, LESS_EQUAL, GREATER_EQUAL;
+terminal ASSIGN, ASSIGN_PLUS, ASSIGN_MINUS, ASSIGN_MUL, ASSIGN_DIVIDE;
 
 terminal String NUMBER;
 terminal String STRING;
@@ -18,60 +19,67 @@ non terminal Instruction ASSIGNMENT;
 non terminal Instruction SUM, PRODUCT, POWER, SIMPLE_TERM;
 non terminal END;
 
+non terminal ArrayList<Instruction> STATEMENT_LIST;
+non terminal Instruction STATEMENT, ASSIGN_STATEMENT, SIMPLE_STATEMENT;
+
 start with SCRIPT;
       
-SCRIPT ::= ASSIGNMENT_LIST:al SUM:s END
-                         {: RESULT = new InstructionScript(al, s); :}
-                      ;
+SCRIPT ::= STATEMENT_LIST:sl STATEMENT:s END {: RESULT = new InstructionScript(sl, s); :};
                
-ASSIGNMENT_LIST ::=
-                   {:  RESULT = new ArrayList<Instruction>(); :}
-                |  ASSIGNMENT_LIST:al ASSIGNMENT:a 
-                   {:  RESULT = al;
-                       RESULT.add(a); 
-                   :}
-                ;
-                
+STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
+                 | STATEMENT_LIST:sl STATEMENT:s {: RESULT = sl; RESULT.add(s); :};
+
+STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
+            | SIMPLE_STATEMENT:ss {: RESULT = ss; :};
+SIMPLE_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
+                   |  NUMBER:n {: RESULT = InstructionConstant.integer(n); :};
+ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.integer(n)); :}
+                   | IDENTIFIER:i ASSIGN STRING:s SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
+                   | IDENTIFIER:i ASSIGN_PLUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.integer(n)); :}
+                   | IDENTIFIER:i ASSIGN_MINUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.integer(n)); :}
+                   | IDENTIFIER:i ASSIGN_MUL NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.integer(n)); :}
+                   | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.integer(n)); :};
+
 END ::= 
      |  SEP
      ;
 
-ASSIGNMENT ::= IDENTIFIER:i ASSIGN SUM:s SEP
-                {: RESULT = new InstructionSetVariable(i, s); :}
-              ;
+// ASSIGNMENT ::= IDENTIFIER:i ASSIGN SUM:s SEP
+//                 {: RESULT = new InstructionSetVariable(i, s); :}
+//               ;
            
        
-SUM ::= PRODUCT:p
-        {: RESULT = p; :}
-     |  MINUS PRODUCT:p
-        {: RESULT = new InstructionNegate(p); :}
-     |  SUM:s PLUS PRODUCT:p
-        {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, s, p); :}
-     |  SUM:s MINUS PRODUCT:p
-        {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, s, p); :}
-     ;
+// SUM ::= PRODUCT:p
+//         {: RESULT = p; :}
+//      |  MINUS PRODUCT:p
+//         {: RESULT = new InstructionNegate(p); :}
+//      |  SUM:s PLUS PRODUCT:p
+//         {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, s, p); :}
+//      |  SUM:s MINUS PRODUCT:p
+//         {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, s, p); :}
+//      ;
      
-PRODUCT ::= POWER:pp
-            {: RESULT = pp; :}
-         |  PRODUCT:p TIMES POWER:pp
-            {: RESULT = new InstructionBinaryOperation(BinaryOperator.TIMES, p, pp); :}
-         |  PRODUCT:p DIV POWER:pp
-            {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, p, pp); :}
-         |  PRODUCT:p MOD POWER:pp
-            {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, p, pp); :}
-         ;
+// PRODUCT ::= POWER:pp
+//             {: RESULT = pp; :}
+//          |  PRODUCT:p TIMES POWER:pp
+//             {: RESULT = new InstructionBinaryOperation(BinaryOperator.TIMES, p, pp); :}
+//          |  PRODUCT:p DIV POWER:pp
+//             {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, p, pp); :}
+//          |  PRODUCT:p MOD POWER:pp
+//             {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, p, pp); :}
+//          ;
                     
-POWER ::= SIMPLE_TERM:st
-          {: RESULT = st; :}
-        | SIMPLE_TERM:st POW POWER:pp
-          {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, st, pp); :}
-        ;
+// POWER ::= SIMPLE_TERM:st
+//           {: RESULT = st; :}
+//         | SIMPLE_TERM:st POW POWER:pp
+//           {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, st, pp); :}
+//         ;
         
-SIMPLE_TERM ::= IDENTIFIER:i
-                {: RESULT = new InstructionGetVariable(i); :}
-             |  NUMBER:n
-                {: RESULT = InstructionConstant.integer(n); :}
-             |  LPAR SUM:s RPAR
-                {: RESULT = s; :}
-             ;    
+// SIMPLE_TERM ::= IDENTIFIER:i
+//                 {: RESULT = new InstructionGetVariable(i); :}
+//              |  NUMBER:n
+//                 {: RESULT = InstructionConstant.integer(n); :}
+//              |  LPAR SUM:s RPAR
+//                 {: RESULT = s; :}
+//              ;    
    

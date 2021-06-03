@@ -3,7 +3,6 @@ package ch.ffhs.pm.fac;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +24,7 @@ public class SkriptRunner
 {
     public static void main(String[] args)
     {
-        Map<String,BigInteger> context = new HashMap<String,BigInteger>();
+        Map<String,Object> context = new HashMap<String,Object>();
         for (;;)
         {
             try
@@ -47,7 +46,7 @@ public class SkriptRunner
                     return;
                 }
                 Parser parser = new Parser(new Scanner(new StringReader(script)));
-                Symbol symbol = parser.parse();
+                Symbol symbol = parser.debug_parse();
                 Instruction instr = (Instruction) symbol.value;
                 Validator validator = new Validator();
                 instr.acceptVisitor(validator);
@@ -64,7 +63,7 @@ public class SkriptRunner
                 else
                 {
                     Evaluator evaluator = new Evaluator(context);
-                    BigInteger result = instr.acceptVisitor(evaluator);
+                    Object result = instr.acceptVisitor(evaluator);
                     System.out.println("---> " + result);
                 }
             }

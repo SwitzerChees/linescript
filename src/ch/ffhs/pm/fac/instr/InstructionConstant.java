@@ -10,6 +10,11 @@ public class InstructionConstant extends Instruction
     {
         return new InstructionConstant(new BigInteger(str));
     }
+
+    public static InstructionConstant string(String str)
+    {
+        return new InstructionConstant(str.replace("\"", ""));
+    }
     
     public InstructionConstant(Object value)
     {

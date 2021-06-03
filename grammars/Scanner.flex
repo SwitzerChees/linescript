@@ -39,20 +39,25 @@ COMMENT   = "//".*
 "/"     { return sym(DIV); }
 "%"     { return sym(MOD); }
 "**"    { return sym(POW); }
-":="    { return sym(ASSIGN); }
 "("	   { return sym(LPAR); }
 ")"	   { return sym(RPAR); }
 
-"="     { return sym(EQUAL); }
+"=="     { return sym(EQUAL); }
 "!="    { return sym(NOT_EQUAL); }
 "<"     { return sym(LESS_THAN); }
 ">"     { return sym(GREATER); }
 "<="    { return sym(LESS_EQUAL); }
 ">="    { return sym(GREATER_EQUAL); }
 
+"="     { return sym(ASSIGN); }
+"+="    { return sym(ASSIGN_PLUS); }
+"-="    { return sym(ASSIGN_MINUS); }
+"*="    { return sym(ASSIGN_MUL); }
+"\="    { return sym(ASSIGN_DIVIDE); }
+
 [0-9]+  { return symVal(NUMBER); }
-\"[a-zA-z0-9\s]*\"                      {return symVal(STRING);}
-([:jletter:]|_)([:jletterdigit:]|_)*	{return symVal(IDENTIFIER); }
+\"[a-zA-z0-9\s]*\"                      { return symVal(STRING); }
+([:jletter:]|_)([:jletterdigit:]|_)*	{ return symVal(IDENTIFIER); }
 
 {BREAK} { return sym(SEP); }
 {OPT_SPACE}	{ }

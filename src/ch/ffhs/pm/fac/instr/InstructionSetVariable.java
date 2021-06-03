@@ -1,19 +1,19 @@
 package ch.ffhs.pm.fac.instr;
 
-public class InstructionSetVariable extends Instruction
-{
+public class InstructionSetVariable extends Instruction {
     final String name;
-    
-    final Instruction value;
-    
-    public InstructionSetVariable(String name, Instruction value)
-    {
+
+    final AssignOperator assignOperator;
+
+    final InstructionConstant value;
+
+    public InstructionSetVariable(String name, AssignOperator assignOperator, InstructionConstant value) {
         this.name = name;
+        this.assignOperator = assignOperator;
         this.value = value;
     }
-    
-    public <R> R acceptVisitor(InstructionVisitor<R> visitor)
-    {
+
+    public <R> R acceptVisitor(InstructionVisitor<R> visitor) {
         return visitor.visitSetVariable(this);
     }
 }
