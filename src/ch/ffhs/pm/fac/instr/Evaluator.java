@@ -189,7 +189,7 @@ public class Evaluator implements InstructionVisitor<Object> {
         Map<String, Object> funcContext = new HashMap<String, Object>();
         InstructionFuncStatement funcStatement = (InstructionFuncStatement)context.get(instructionFuncCallStatement.name);
         for (int i = 0; i < funcStatement.parameters.size(); i++) {
-            funcContext.put(funcStatement.parameters.get(i), instructionFuncCallStatement.statements.get(i));
+            funcContext.put(funcStatement.parameters.get(i), instructionFuncCallStatement.statements.get(i).acceptVisitor(this));
         }
         Evaluator evaluator = new Evaluator(funcContext);
         return funcStatement.statement.acceptVisitor(evaluator);
