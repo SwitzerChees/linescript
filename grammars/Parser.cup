@@ -34,11 +34,13 @@ STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
 BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                    |  NUMBER:n {: RESULT = InstructionConstant.number(n); :}
                    |  STRING:s {: RESULT = InstructionConstant.string(s); :}
-                   |  TRUE {: RESULT = InstructionConstant.number("1"); :}
-                   |  FALSE {: RESULT = InstructionConstant.number("0"); :};
+                   |  TRUE {: RESULT = InstructionConstant.bool(true); :}
+                   |  FALSE {: RESULT = InstructionConstant.bool(false); :};
 
 ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN STRING:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
+                   | IDENTIFIER:i ASSIGN TRUE {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.bool(true)); :}
+                   | IDENTIFIER:i ASSIGN FALSE {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.bool(false)); :}
                    | IDENTIFIER:i ASSIGN_PLUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_MINUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}

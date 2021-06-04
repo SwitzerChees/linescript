@@ -15,6 +15,11 @@ public class InstructionConstant extends Instruction
     {
         return new InstructionConstant(str.replace("\"", ""), VariableType.STRING);
     }
+
+    public static InstructionConstant bool(boolean val)
+    {
+        return new InstructionConstant(val, VariableType.BOOLEAN);
+    }
     
     public InstructionConstant(Object value, VariableType variableType)
     {

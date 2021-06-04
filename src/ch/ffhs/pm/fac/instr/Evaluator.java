@@ -76,6 +76,9 @@ public class Evaluator implements InstructionVisitor<Object> {
         } else if (instructionSetVariable.value.variableType == VariableType.STRING) {
             String evaluatedValue = (String) instructionSetVariable.value.acceptVisitor(this);
             context.put(instructionSetVariable.name, evaluatedValue);
+        } else if (instructionSetVariable.value.variableType == VariableType.BOOLEAN) {
+            boolean evaluatedValue = (boolean) instructionSetVariable.value.acceptVisitor(this);
+            context.put(instructionSetVariable.name, evaluatedValue);
         }
         return null;
     }
@@ -135,11 +138,10 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement) {
-        Boolean conditionalStatement = (Boolean)instructionIfElseStatement.conditionalStatement.acceptVisitor(this);
+        Boolean conditionalStatement = (Boolean) instructionIfElseStatement.conditionalStatement.acceptVisitor(this);
         if (conditionalStatement) {
             return instructionIfElseStatement.ifStatement.acceptVisitor(this);
-        }
-        else if (instructionIfElseStatement.elseStatement != null) {
+        } else if (instructionIfElseStatement.elseStatement != null) {
             return instructionIfElseStatement.elseStatement.acceptVisitor(this);
         }
         return null;
