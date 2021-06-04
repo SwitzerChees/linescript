@@ -18,7 +18,8 @@ public class SinglescriptCompleter implements Completer {
     @Override
     public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
         for (String var : context.keySet()) {
-            if(var.startsWith(line.line())) {
+            int wordStart = line.cursor() - line.wordCursor();
+            if(var.startsWith(line.line().substring(wordStart, wordStart + line.word().length()))) {
                 candidates.add(new Candidate(var));
             }
         }
