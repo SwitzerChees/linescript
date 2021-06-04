@@ -44,17 +44,22 @@ public class SinglescriptHighlighter implements Highlighter {
         } else {
             boolean prevIsSpace = Character.isSpaceChar(buffer.charAt(0));
             int prevPos = 0;
-            for (int i = 1; i < buffer.length(); ++i) {
+            boolean inString = false;
+            for (int i = 0; i < buffer.length(); ++i) {
                 char c = buffer.charAt(i);
+                if (c == '"') {
+                    inString = !inString;
+                }
                 boolean isSpace = Character.isSpaceChar(c);
                 if (!isSpace) {
                     for (Character operation : OPERATIONS) {
                         if (c == operation) {
                             isSpace = true;
+                            break;
                         }
                     }
                 }
-                if (isSpace != prevIsSpace) {
+                if (isSpace != prevIsSpace && (!inString || prevIsSpace)) {
                     list.add(buffer.substring(prevPos, i));
                     prevPos = i;
                     prevIsSpace = isSpace;
@@ -100,7 +105,7 @@ public class SinglescriptHighlighter implements Highlighter {
     }
 
     private boolean isString(String token) {
-        if (token.length() > 1 && token.charAt(0) == '"' && token.charAt(token.length() - 1) == '"') {
+        if (token.matches("\"[a-zA-z0-9\\s]*\"")) {
             return true;
         }
         return false;
