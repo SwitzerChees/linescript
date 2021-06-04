@@ -177,4 +177,21 @@ public class Evaluator implements InstructionVisitor<Object> {
         }
         return instructionScript.lastInstruction.acceptVisitor(this);
     }
+
+    @Override
+    public Object visitFuncStatement(InstructionFuncStatement instructionFuncStatement) {
+        context.put(instructionFuncStatement.name, instructionFuncStatement);
+        return null;
+    }
+
+    @Override
+    public Object visitFuncCallStatement(InstructionFuncCallStatement instructionFuncCallStatement) {
+        Map<String, Object> funcContext = new HashMap<String, Object>();
+        InstructionFuncStatement funcStatement = (InstructionFuncStatement)context.get(instructionFuncCallStatement.name);
+        for (int i = 0; i < funcStatement.parameters.size(); i++) {
+            funcContext.put(funcStatement.parameters.get(i), instructionFuncCallStatement.statements.get(i));
+        }
+        Evaluator evaluator = new Evaluator(funcContext);
+        return funcStatement.statement.acceptVisitor(evaluator);
+    }
 }

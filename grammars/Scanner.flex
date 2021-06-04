@@ -38,11 +38,14 @@ COMMENT   = "//".*
 "func"  { return sym(FUNC); }
 "while" { return sym(WHILE); }
 
-"true" { return sym(TRUE); }
+"true"  { return sym(TRUE); }
 "false" { return sym(FALSE); }
 
 ":"     { return sym(TERMINATOR); }
 ","     { return sym(SEPARATOR); }
+
+"("     { return sym(BRACKETS_LEFT); }
+")"     { return sym(BRACKETS_RIGHT); }
 
 // "+"     { return sym(PLUS); }
 // "-"     { return sym(MINUS); }

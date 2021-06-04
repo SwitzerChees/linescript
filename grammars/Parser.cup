@@ -1,12 +1,14 @@
 package ch.ffhs.pm.fac.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java_cup.runtime.*;
 import ch.ffhs.pm.fac.instr.*;
 
 terminal EQUAL, NOT_EQUAL, LESS_THAN, GREATER, LESS_EQUAL, GREATER_EQUAL;
 terminal ASSIGN, ASSIGN_PLUS, ASSIGN_MINUS, ASSIGN_MUL, ASSIGN_DIVIDE;
 terminal IF, ELSE, FUNC, WHILE, TERMINATOR, SEPARATOR, TRUE, FALSE, SEP;
+terminal BRACKETS_LEFT, BRACKETS_RIGHT;
 
 terminal String NUMBER;
 terminal String STRING;
@@ -16,8 +18,11 @@ non terminal Instruction SCRIPT;
 non terminal END;
 
 non terminal ArrayList<Instruction> STATEMENT_LIST;
+non terminal ArrayList<String> PARAMETER_LIST;
+non terminal ArrayList<Instruction> ARGUMENT_LIST;
 non terminal Instruction STATEMENT, ASSIGN_STATEMENT, BASIC_STATEMENT;
 non terminal Instruction IF_STATEMENT, ELSE_STATEMENT, CONDITIONAL_STATEMENT, WHILE_STATEMENT;
+non terminal Instruction FUNCTION_STATEMENT, FUNCTION_CALL_STATEMENT;
 
 start with SCRIPT;
       
@@ -30,7 +35,9 @@ STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
             | BASIC_STATEMENT:bs {: RESULT = bs; :}
             | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
             | IF_STATEMENT:is SEP {: RESULT = is; :}
-            | WHILE_STATEMENT:ws SEP {: RESULT = ws; :};
+            | WHILE_STATEMENT:ws SEP {: RESULT = ws; :}
+            | FUNCTION_STATEMENT:fs SEP {: RESULT = fs; :}
+            | FUNCTION_CALL_STATEMENT:fcs {: RESULT = fcs; :};
 
 BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                    |  NUMBER:n {: RESULT = InstructionConstant.number(n); :}
@@ -59,6 +66,14 @@ CONDITIONAL_STATEMENT ::= BASIC_STATEMENT:bsl EQUAL BASIC_STATEMENT:bsr {: RESUL
                         | BASIC_STATEMENT:bsl GREATER_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, bsl, bsr); :};
 
 WHILE_STATEMENT ::= WHILE CONDITIONAL_STATEMENT:cs TERMINATOR STATEMENT_LIST:sl {: RESULT = new InstructionWhileStatement(cs, sl); :};
+
+FUNCTION_STATEMENT ::= FUNC IDENTIFIER:i PARAMETER_LIST:pl TERMINATOR STATEMENT:s {: RESULT = new InstructionFuncStatement(i, pl, s); :};
+PARAMETER_LIST ::= IDENTIFIER:i {: RESULT = new ArrayList<String>(Arrays.asList(i)); :}
+                 | IDENTIFIER:i SEPARATOR PARAMETER_LIST:pl {: RESULT = new ArrayList<String>(Arrays.asList(i)); RESULT.addAll(pl); :};
+
+FUNCTION_CALL_STATEMENT ::= IDENTIFIER:i BRACKETS_LEFT ARGUMENT_LIST:al BRACKETS_RIGHT {: RESULT = new InstructionFuncCallStatement(i, al); :};
+ARGUMENT_LIST ::= BASIC_STATEMENT:bs {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); :}
+                | BASIC_STATEMENT:bs SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); RESULT.addAll(al); :};
 
 END ::= 
      |  SEP

@@ -120,4 +120,17 @@ public class Validator implements InstructionVisitor<Object> {
         }
         return null;
     }
+
+    @Override
+    public Object visitFuncStatement(InstructionFuncStatement instructionFuncStatement) {
+        return null;
+    }
+
+    @Override
+    public Object visitFuncCallStatement(InstructionFuncCallStatement instructionFuncCallStatement) {
+        for (Instruction instr : instructionFuncCallStatement.statements) {
+            instr.acceptVisitor(this);
+        }
+        return null;
+    }
 }

@@ -10,6 +10,10 @@ public interface InstructionVisitor<R>
 
     public R visitWhileStatement(InstructionWhileStatement instructionWhileStatement);
 
+    public R visitFuncStatement(InstructionFuncStatement instructionFuncStatement);
+
+    public R visitFuncCallStatement(InstructionFuncCallStatement instructionFuncCallStatement);
+
     public R visitConditionalStatement(InstructionConditionalStatement instructionConditionalStatement);
 
     public R visitNegation(InstructionNegate instructionUnaryOperation);
