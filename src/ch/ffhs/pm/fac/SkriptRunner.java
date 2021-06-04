@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import java_cup.runtime.Symbol;
+import ch.ffhs.pm.fac.console.SinglescriptCompleter;
 import ch.ffhs.pm.fac.console.SinglescriptHighlighter;
 import ch.ffhs.pm.fac.instr.Evaluator;
 import ch.ffhs.pm.fac.instr.Instruction;
@@ -26,8 +27,8 @@ public class SkriptRunner {
         try {
             Map<String, Object> context = new HashMap<String, Object>();
             Validator validator = new Validator();
-            LineReader reader = LineReaderBuilder.builder()
-            .highlighter(new SinglescriptHighlighter()).build();
+            LineReader reader = LineReaderBuilder.builder().highlighter(new SinglescriptHighlighter())
+                    .completer(new SinglescriptCompleter(context)).build();
             for (;;) {
                 try {
                     String script = reader.readLine("> ");
@@ -50,22 +51,25 @@ public class SkriptRunner {
                         Evaluator evaluator = new Evaluator(context);
                         Object result = instr.acceptVisitor(evaluator);
                         if (result != null) {
-                            if (result instanceof ArrayList<?>){
-                                ArrayList<?>  results = (ArrayList<?>)result;
-                                for(Object res : results) {
+                            if (result instanceof ArrayList<?>) {
+                                ArrayList<?> results = (ArrayList<?>) result;
+                                for (Object res : results) {
                                     System.out.println(res);
                                 }
-                            }
-                            else {
+                            } else {
                                 System.out.println(result);
                             }
                         }
                     }
+                } catch (UserInterruptException ex) {
+                    continue;
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-        } catch (Exception ex) {
+        }
+
+        catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }

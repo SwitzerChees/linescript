@@ -32,6 +32,8 @@ public class SinglescriptHighlighter implements Highlighter {
         OPERATIONS.add('-');
         OPERATIONS.add('*');
         OPERATIONS.add('/');
+        OPERATIONS.add('(');
+        OPERATIONS.add(')');
     }
 
     private static List<String> split(String buffer) {
@@ -80,10 +82,12 @@ public class SinglescriptHighlighter implements Highlighter {
                 builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.GREEN)).append(token);
             } else if (isKeyword(token)) {
                 builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW)).append(token);
+            } else if (isIdentifier(token)) {
+                builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.CYAN)).append(token);
             } else if (isString(token)) {
                 builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.MAGENTA)).append(token);
             } else if (isNumber(token)) {
-                builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.CYAN)).append(token);
+                builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.RED)).append(token);
             } else {
                 builder.style(AttributedStyle.DEFAULT).append(token);
             }
@@ -100,6 +104,13 @@ public class SinglescriptHighlighter implements Highlighter {
         for (String keyword : KEYWORDS) {
             if (keyword.compareToIgnoreCase(token) == 0)
                 return true;
+        }
+        return false;
+    }
+
+    private boolean isIdentifier(String token) {
+        if (token.matches("[_a-zA-Z][_a-zA-Z0-9]*")) {
+            return true;
         }
         return false;
     }
