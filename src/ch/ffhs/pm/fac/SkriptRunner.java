@@ -40,17 +40,17 @@ public class SkriptRunner {
                     Parser parser = new Parser(new Scanner(new StringReader(script)));
                     Symbol symbol = parser.parse();
                     Instruction instr = (Instruction) symbol.value;
+                    validator.cleanup();
                     instr.acceptVisitor(validator);
-                    if (!validator.getUnusedVariables().isEmpty()) {
-                        System.out.println("Warning: Unused variables: " + setToString(validator.getUnusedVariables()));
-                    }
                     if (!validator.getUndefinedVariables().isEmpty()) {
                         System.out.println(
                                 "Error: Undefined variables: " + setToString(validator.getUndefinedVariables()));
                     } else {
                         Evaluator evaluator = new Evaluator(context);
                         Object result = instr.acceptVisitor(evaluator);
-                        System.out.println(result);
+                        if (result != null) {
+                            System.out.println(result);
+                        }
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();

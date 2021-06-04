@@ -32,6 +32,11 @@ public class Validator implements InstructionVisitor<Object> {
         return undefinedVariables;
     }
 
+    public void cleanup() {
+        undefinedVariables = new HashSet<String>();
+        unusedVariables = new HashSet<String>();
+    }
+
     /**
      * Liefert alle Variablen, die nach einer Zuordnung nicht mehr verwendet werden.
      * Sollte leer sein.
