@@ -8,6 +8,8 @@ public interface InstructionVisitor<R>
 
     public R visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement);
 
+    public R visitWhileStatement(InstructionWhileStatement instructionWhileStatement);
+
     public R visitConditionalStatement(InstructionConditionalStatement instructionConditionalStatement);
 
     public R visitNegation(InstructionNegate instructionUnaryOperation);

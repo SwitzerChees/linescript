@@ -111,4 +111,13 @@ public class Validator implements InstructionVisitor<Object> {
         }
         return null;
     }
+
+    @Override
+    public Object visitWhileStatement(InstructionWhileStatement instructionWhileStatement) {
+        instructionWhileStatement.conditionalStatement.acceptVisitor(this);
+        for (Instruction instr : instructionWhileStatement.statementList) {
+            instr.acceptVisitor(this);
+        }
+        return null;
+    }
 }

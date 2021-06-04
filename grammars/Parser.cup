@@ -17,7 +17,7 @@ non terminal END;
 
 non terminal ArrayList<Instruction> STATEMENT_LIST;
 non terminal Instruction STATEMENT, ASSIGN_STATEMENT, BASIC_STATEMENT;
-non terminal Instruction IF_STATEMENT, ELSE_STATEMENT, CONDITIONAL_STATEMENT;
+non terminal Instruction IF_STATEMENT, ELSE_STATEMENT, CONDITIONAL_STATEMENT, WHILE_STATEMENT;
 
 start with SCRIPT;
       
@@ -29,7 +29,8 @@ STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
 STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
             | BASIC_STATEMENT:bs {: RESULT = bs; :}
             | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
-            | IF_STATEMENT:is SEP {: RESULT = is; :};
+            | IF_STATEMENT:is SEP {: RESULT = is; :}
+            | WHILE_STATEMENT:ws SEP {: RESULT = ws; :};
 
 BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                    |  NUMBER:n {: RESULT = InstructionConstant.number(n); :}
@@ -46,8 +47,8 @@ ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n {: RESULT = new InstructionSet
                    | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
 
-IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s {: RESULT = new InstructionIfElseStatement(ce, s, null); :}
-               | IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s ELSE_STATEMENT:es {: RESULT = new InstructionIfElseStatement(ce, s, es); :};
+IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:cs TERMINATOR STATEMENT:s {: RESULT = new InstructionIfElseStatement(cs, s, null); :}
+               | IF CONDITIONAL_STATEMENT:cs TERMINATOR STATEMENT:s ELSE_STATEMENT:es {: RESULT = new InstructionIfElseStatement(cs, s, es); :};
 ELSE_STATEMENT ::= ELSE TERMINATOR STATEMENT:s {: RESULT = s; :};
 
 CONDITIONAL_STATEMENT ::= BASIC_STATEMENT:bsl EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, bsl, bsr); :}
@@ -56,6 +57,8 @@ CONDITIONAL_STATEMENT ::= BASIC_STATEMENT:bsl EQUAL BASIC_STATEMENT:bsr {: RESUL
                         | BASIC_STATEMENT:bsl GREATER BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, bsl, bsr); :}
                         | BASIC_STATEMENT:bsl LESS_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, bsl, bsr); :}
                         | BASIC_STATEMENT:bsl GREATER_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, bsl, bsr); :};
+
+WHILE_STATEMENT ::= WHILE CONDITIONAL_STATEMENT:cs TERMINATOR STATEMENT_LIST:sl {: RESULT = new InstructionWhileStatement(cs, sl); :};
 
 END ::= 
      |  SEP

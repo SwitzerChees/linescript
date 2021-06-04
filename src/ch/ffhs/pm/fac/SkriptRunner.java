@@ -1,6 +1,7 @@
 package ch.ffhs.pm.fac;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +50,15 @@ public class SkriptRunner {
                         Evaluator evaluator = new Evaluator(context);
                         Object result = instr.acceptVisitor(evaluator);
                         if (result != null) {
-                            System.out.println(result);
+                            if (result instanceof ArrayList<?>){
+                                ArrayList<?>  results = (ArrayList<?>)result;
+                                for(Object res : results) {
+                                    System.out.println(res);
+                                }
+                            }
+                            else {
+                                System.out.println(result);
+                            }
                         }
                     }
                 } catch (Exception ex) {

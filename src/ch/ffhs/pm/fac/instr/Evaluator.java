@@ -1,6 +1,7 @@
 package ch.ffhs.pm.fac.instr;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,6 +146,22 @@ public class Evaluator implements InstructionVisitor<Object> {
             return instructionIfElseStatement.elseStatement.acceptVisitor(this);
         }
         return null;
+    }
+
+    @Override
+    public Object visitWhileStatement(InstructionWhileStatement instructionWhileStatement) {
+        Boolean conditionalStatement = (Boolean) instructionWhileStatement.conditionalStatement.acceptVisitor(this);
+        ArrayList<Object> results = new ArrayList<Object>();
+        while (conditionalStatement) {
+            for (Instruction instr : instructionWhileStatement.statementList) {
+                Object result = instr.acceptVisitor(this);
+                if (result != null) {
+                    results.add(result);
+                }
+            }
+            conditionalStatement = (Boolean) instructionWhileStatement.conditionalStatement.acceptVisitor(this);
+        }
+        return results;
     }
 
     @Override
