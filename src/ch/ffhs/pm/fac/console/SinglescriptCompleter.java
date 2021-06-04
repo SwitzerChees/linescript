@@ -20,7 +20,9 @@ public class SinglescriptCompleter implements Completer {
         for (String var : context.keySet()) {
             int wordStart = line.cursor() - line.wordCursor();
             if(var.startsWith(line.line().substring(wordStart, wordStart + line.word().length()))) {
-                candidates.add(new Candidate(var));
+                String candidateGroup = "Variables"; //TODO: Functions
+                String candidateValue = context.get(var).toString();
+                candidates.add(new Candidate(var, var, candidateGroup, candidateValue, null, null, true));
             }
         }
     }
