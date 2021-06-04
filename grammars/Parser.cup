@@ -29,7 +29,7 @@ STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
 STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
             | BASIC_STATEMENT:bs {: RESULT = bs; :}
             | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
-            | IF_STATEMENT:is {: RESULT = is; :};
+            | IF_STATEMENT:is SEP {: RESULT = is; :};
 
 BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                    |  NUMBER:n {: RESULT = InstructionConstant.number(n); :}
@@ -37,14 +37,14 @@ BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                    |  TRUE {: RESULT = InstructionConstant.number("1"); :}
                    |  FALSE {: RESULT = InstructionConstant.number("0"); :};
 
-ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN STRING:s SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
-                   | IDENTIFIER:i ASSIGN_PLUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN_MINUS NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN_MUL NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n SEP {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
+ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN STRING:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
+                   | IDENTIFIER:i ASSIGN_PLUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN_MINUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
+                   | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
 
-IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s SEP {: RESULT = new InstructionIfElseStatement(ce, s, null); :}
+IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s {: RESULT = new InstructionIfElseStatement(ce, s, null); :}
                | IF CONDITIONAL_STATEMENT:ce TERMINATOR STATEMENT:s ELSE_STATEMENT:es {: RESULT = new InstructionIfElseStatement(ce, s, es); :};
 ELSE_STATEMENT ::= ELSE TERMINATOR STATEMENT:s {: RESULT = s; :};
 
