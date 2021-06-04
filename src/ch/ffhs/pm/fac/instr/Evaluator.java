@@ -140,6 +140,9 @@ public class Evaluator implements InstructionVisitor<Object> {
         if (conditionalStatement) {
             return instructionIfElseStatement.ifStatement.acceptVisitor(this);
         }
+        else if (instructionIfElseStatement.elseStatement != null) {
+            return instructionIfElseStatement.elseStatement.acceptVisitor(this);
+        }
         return null;
     }
 
