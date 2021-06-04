@@ -11,6 +11,7 @@ import java.util.List;
 
 public class SinglescriptHighlighter implements Highlighter {
     private static final List<String> KEYWORDS;
+    private static final List<Character> OPERATIONS;
 
     static {
         KEYWORDS = new ArrayList<String>();
@@ -18,36 +19,61 @@ public class SinglescriptHighlighter implements Highlighter {
         KEYWORDS.add("else");
         KEYWORDS.add("func");
         KEYWORDS.add("while");
+        KEYWORDS.add("true");
+        KEYWORDS.add("false");
+        OPERATIONS = new ArrayList<Character>();
+        OPERATIONS.add(':');
+        OPERATIONS.add(',');
+        OPERATIONS.add('=');
+        OPERATIONS.add('!');
+        OPERATIONS.add('<');
+        OPERATIONS.add('>');
+        OPERATIONS.add('+');
+        OPERATIONS.add('-');
+        OPERATIONS.add('*');
+        OPERATIONS.add('/');
     }
 
-    private static List<String> splitWithSpace(String buffer) {
+    private static List<String> split(String buffer) {
         List<String> list = new ArrayList<String>();
         if (buffer == null || buffer.isEmpty()) {
             return list;
         }
-
-        boolean prevIsSpace = Character.isSpaceChar(buffer.charAt(0));
-        int prevPos = 0;
-        for (int i = 1; i < buffer.length(); ++i) {
-            char c = buffer.charAt(i);
-            boolean isSpace = Character.isSpaceChar(c);
-            if (isSpace != prevIsSpace) {
-                list.add(buffer.substring(prevPos, i));
-                prevPos = i;
-                prevIsSpace = isSpace;
+        if (buffer.trim().startsWith("//")) {
+            list.add(buffer);
+        } else {
+            boolean prevIsSpace = Character.isSpaceChar(buffer.charAt(0));
+            int prevPos = 0;
+            for (int i = 1; i < buffer.length(); ++i) {
+                char c = buffer.charAt(i);
+                boolean isSpace = Character.isSpaceChar(c);
+                if (!isSpace) {
+                    for (Character operation : OPERATIONS) {
+                        if (c == operation) {
+                            isSpace = true;
+                        }
+                    }
+                }
+                if (isSpace != prevIsSpace) {
+                    list.add(buffer.substring(prevPos, i));
+                    prevPos = i;
+                    prevIsSpace = isSpace;
+                }
             }
+            list.add(buffer.substring(prevPos));
         }
-        list.add(buffer.substring(prevPos));
         return list;
     }
 
     @Override
     public AttributedString highlight(LineReader reader, String buffer) {
         AttributedStringBuilder builder = new AttributedStringBuilder();
-        List<String> tokens = splitWithSpace(buffer);
+        List<String> tokens = split(buffer);
 
         for (String token : tokens) {
-            if (isKeyword(token)) {
+            if (isComment(token)) {
+                builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.GREEN)).append(token);
+            } else if (isKeyword(token)) {
                 builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW)).append(token);
             } else if (isString(token)) {
                 builder.style(AttributedStyle.BOLD.foreground(AttributedStyle.MAGENTA)).append(token);
@@ -59,6 +85,10 @@ public class SinglescriptHighlighter implements Highlighter {
         }
 
         return builder.toAttributedString();
+    }
+
+    private boolean isComment(String token) {
+        return token.trim().startsWith("//");
     }
 
     private boolean isKeyword(String token) {

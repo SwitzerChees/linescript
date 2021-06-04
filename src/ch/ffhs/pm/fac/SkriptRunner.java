@@ -30,6 +30,7 @@ public class SkriptRunner {
             for (;;) {
                 try {
                     String script = reader.readLine("> ");
+                    script += '\n';
                     if (script.trim().length() == 0) {
                         continue;
                     } else if (script.trim().equals("exit()")) {
