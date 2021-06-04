@@ -1,7 +1,6 @@
 package ch.ffhs.pm.fac.instr;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
