@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Ein Evaluator zum Auswerten von Instructions. Die Klasse ist eine
@@ -52,9 +54,10 @@ public class Evaluator implements InstructionVisitor<Object> {
     public Object visitSetVariable(InstructionSetVariable instructionSetVariable) {
         if (instructionSetVariable.value.variableType == VariableType.NUMBER) {
             BigDecimal evaluatedValue = (BigDecimal) instructionSetVariable.value.acceptVisitor(this);
-            BigDecimal existingValue = (BigDecimal) context.get(instructionSetVariable.name);
-            if (existingValue == null) {
-                existingValue = new BigDecimal(0);
+            BigDecimal existingValue = new BigDecimal(0);
+            Object exValue = context.get(instructionSetVariable.name);
+            if (exValue instanceof BigDecimal) {
+                existingValue = (BigDecimal)exValue;
             }
             switch (instructionSetVariable.assignOperator) {
                 case ASSIGN:
@@ -76,6 +79,9 @@ public class Evaluator implements InstructionVisitor<Object> {
             context.put(instructionSetVariable.name, existingValue);
         } else if (instructionSetVariable.value.variableType == VariableType.STRING) {
             String evaluatedValue = (String) instructionSetVariable.value.acceptVisitor(this);
+            for (String var : context.keySet()) {
+                evaluatedValue = evaluatedValue.replaceAll(String.format("\\$\\{%s\\}", var), context.get(var).toString());
+            }
             context.put(instructionSetVariable.name, evaluatedValue);
         } else if (instructionSetVariable.value.variableType == VariableType.BOOLEAN) {
             boolean evaluatedValue = (boolean) instructionSetVariable.value.acceptVisitor(this);
@@ -133,6 +139,23 @@ public class Evaluator implements InstructionVisitor<Object> {
                 case GREATER_EQUAL:
                     return leftNumber.compareTo(rightNumber) >= 0;
             }
+        } else if (left instanceof String) {
+            String leftString = (String) left;
+            String rightString = (String) right;
+            switch (instructionCondExpr.conditionalExpression) {
+                case EQUAL:
+                    return leftString.equals(rightString);
+                case NOT_EQUAL:
+                    return !leftString.equals(rightString);
+                case LESS_THAN:
+                    return leftString.compareTo(rightString) < 0;
+                case LESS_EQUAL:
+                    return leftString.compareTo(rightString) <= 0;
+                case GREATER:
+                    return leftString.compareTo(rightString) > 0;
+                case GREATER_EQUAL:
+                    return leftString.compareTo(rightString) >= 0;
+            }
         }
         return false;
     }
@@ -187,9 +210,11 @@ public class Evaluator implements InstructionVisitor<Object> {
     @Override
     public Object visitFuncCallStatement(InstructionFuncCallStatement instructionFuncCallStatement) {
         Map<String, Object> funcContext = new HashMap<String, Object>();
-        InstructionFuncStatement funcStatement = (InstructionFuncStatement)context.get(instructionFuncCallStatement.name);
+        InstructionFuncStatement funcStatement = (InstructionFuncStatement) context
+                .get(instructionFuncCallStatement.name);
         for (int i = 0; i < funcStatement.parameters.size(); i++) {
-            funcContext.put(funcStatement.parameters.get(i), instructionFuncCallStatement.statements.get(i).acceptVisitor(this));
+            funcContext.put(funcStatement.parameters.get(i),
+                    instructionFuncCallStatement.statements.get(i).acceptVisitor(this));
         }
         Evaluator evaluator = new Evaluator(funcContext);
         return funcStatement.statement.acceptVisitor(evaluator);

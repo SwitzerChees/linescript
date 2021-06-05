@@ -116,7 +116,7 @@ public class LinescriptHighlighter implements Highlighter {
     }
 
     private boolean isString(String token) {
-        if (token.matches("\"[a-zA-z0-9\\s]*\"")) {
+        if (token.matches("\"[a-zA-z0-9\\s\\$\\{\\}]*\"")) {
             return true;
         }
         return false;
