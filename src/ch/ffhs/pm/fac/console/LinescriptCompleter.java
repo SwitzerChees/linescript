@@ -10,10 +10,10 @@ import ch.ffhs.pm.fac.instr.InstructionFuncStatement;
 import java.util.List;
 import java.util.Map;
 
-public class SinglescriptCompleter implements Completer {
+public class LinescriptCompleter implements Completer {
     private final Map<String, Object> context;
    
-    public SinglescriptCompleter(Map<String, Object> context) {
+    public LinescriptCompleter(Map<String, Object> context) {
         this.context = context;
     }
 

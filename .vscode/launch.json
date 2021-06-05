@@ -6,9 +6,9 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch SkriptRunner",
+            "name": "Launch Linescript",
             "request": "launch",
-            "mainClass": "ch.ffhs.pm.fac.SkriptRunner",
+            "mainClass": "ch.ffhs.pm.fac.Linescript",
             "preLaunchTask": "compile"
         }
     ]

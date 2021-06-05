@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import java_cup.runtime.Symbol;
-import ch.ffhs.pm.fac.console.SinglescriptCompleter;
-import ch.ffhs.pm.fac.console.SinglescriptHighlighter;
+import ch.ffhs.pm.fac.console.LinescriptCompleter;
+import ch.ffhs.pm.fac.console.LinescriptHighlighter;
 import ch.ffhs.pm.fac.instr.Evaluator;
 import ch.ffhs.pm.fac.instr.Instruction;
 import ch.ffhs.pm.fac.instr.Validator;
@@ -22,13 +22,13 @@ import org.jline.reader.*;
  * 
  * @author Patrick Michel
  */
-public class SkriptRunner {
+public class Linescript {
     public static void main(String[] args) {
         try {
             Map<String, Object> context = new HashMap<String, Object>();
             Validator validator = new Validator();
-            LineReader reader = LineReaderBuilder.builder().highlighter(new SinglescriptHighlighter())
-                    .completer(new SinglescriptCompleter(context)).build();
+            LineReader reader = LineReaderBuilder.builder().highlighter(new LinescriptHighlighter())
+                    .completer(new LinescriptCompleter(context)).build();
             for (;;) {
                 try {
                     String script = reader.readLine("> ");

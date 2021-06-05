@@ -9,7 +9,7 @@ import org.jline.utils.AttributedStyle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SinglescriptHighlighter implements Highlighter {
+public class LinescriptHighlighter implements Highlighter {
     private static final List<String> KEYWORDS;
     private static final List<Character> OPERATIONS;
 
