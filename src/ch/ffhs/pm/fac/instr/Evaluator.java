@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Ein Evaluator zum Auswerten von Instructions. Die Klasse ist eine
@@ -97,7 +95,10 @@ public class Evaluator implements InstructionVisitor<Object> {
             InstructionGetVariable instGetVar = (InstructionGetVariable)instructionSetVariable.value;
             Object exValue = context.get(instGetVar.name);
             context.put(instructionSetVariable.name, exValue);
-        }
+        } else if (instructionSetVariable.value instanceof InstructionBinaryOperation) {
+            InstructionBinaryOperation instBinaryOperation = (InstructionBinaryOperation)instructionSetVariable.value;
+            context.put(instructionSetVariable.name, instBinaryOperation.acceptVisitor(this));
+        } 
         return null;
     }
 

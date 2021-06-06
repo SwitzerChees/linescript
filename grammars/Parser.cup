@@ -50,6 +50,7 @@ BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
                   | NEGATE_STATEMENT:ns {: RESULT = InstructionConstant.instruction(ns); :};
 
 ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN BASIC_STATEMENT:bs {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  bs); :}
+                   | IDENTIFIER:i ASSIGN ARITHMETIC_STATEMENT:as {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  as); :}
                    | IDENTIFIER:i ASSIGN_PLUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_MINUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
