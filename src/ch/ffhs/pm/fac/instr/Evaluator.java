@@ -229,6 +229,11 @@ public class Evaluator implements InstructionVisitor<Object> {
                     instructionFuncCallStatement.statements.get(i).acceptVisitor(this));
         }
         Evaluator evaluator = new Evaluator(funcContext);
+        if (funcStatement.name.equals("exit")) {
+            int statusCode = Integer.parseInt(funcStatement.statement.acceptVisitor(evaluator).toString());
+            System.out.println("Bye! 👋");
+            System.exit(statusCode);
+        }
         return funcStatement.statement.acceptVisitor(evaluator);
     }
 }

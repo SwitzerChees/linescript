@@ -1,6 +1,8 @@
 package ch.ffhs.pm.fac;
 
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,16 +31,23 @@ public class Linescript {
             Validator validator = new Validator();
             LineReader reader = LineReaderBuilder.builder().highlighter(new LinescriptHighlighter())
                     .completer(new LinescriptCompleter(context)).build();
+            System.out.println("Linescript 1.0.0");
+            System.out.println("Use <tab> to use autocomplete for variables & functions");
+            System.out.println("Type 'exit()' to close the console");
+            System.out.println("©2021 SwitzerChees. Made with a lot of ☕");
+            boolean isInit = true;
+            String script = Files.readString(Path.of("init.ls"));
             for (;;) {
                 try {
-                    String script = reader.readLine("> ");
-                    script += '\n';
+                    if (isInit) {
+                        isInit = false;
+                    } else {
+                        script = reader.readLine("> ");
+                        script += '\n';
+                    }
                     if (script.trim().length() == 0) {
                         continue;
-                    } else if (script.trim().equals("exit()")) {
-                        System.out.println("Bye! 👋");
-                        return;
-                    }
+                    } 
                     Parser parser = new Parser(new Scanner(new StringReader(script)));
                     Symbol symbol = parser.parse();
                     Instruction instr = (Instruction) symbol.value;

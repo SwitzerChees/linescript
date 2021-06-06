@@ -1,4 +1,4 @@
-FROM openjdk:14-slim-buster
+FROM openjdk:15-slim-buster
 
 WORKDIR /app
 

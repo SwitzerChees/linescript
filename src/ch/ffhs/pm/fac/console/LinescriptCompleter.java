@@ -32,7 +32,7 @@ public class LinescriptCompleter implements Completer {
                 } else {
                     candidateValue = context.get(var).toString();
                 }
-                candidates.add(new Candidate(var, var, candidateGroup, candidateValue, null, null, true));
+                candidates.add(new Candidate(var, var, candidateGroup, candidateValue, null, null, false));
             }
         }
     }

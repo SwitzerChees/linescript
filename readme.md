@@ -16,7 +16,7 @@ docker run -it switzerchees/linescript:latest
 
 ### ♾️ Dependencies
 
-* \>= java 14 (major version 58).
+* \>= java 15 (major version 59).
 * JFlex to create the token scanner.
 * Java CUP: stands for Construction of Useful Parsers and is an LALR parser generator for Java.
 
