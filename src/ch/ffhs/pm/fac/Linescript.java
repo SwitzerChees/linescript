@@ -43,8 +43,8 @@ public class Linescript {
                         isInit = false;
                     } else {
                         script = reader.readLine("> ");
-                        script += '\n';
                     }
+                    script += '\n';
                     if (script.trim().length() == 0) {
                         continue;
                     } 

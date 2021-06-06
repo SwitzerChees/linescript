@@ -1,1 +1,1 @@
-func exit status: status
+exit = func: 0

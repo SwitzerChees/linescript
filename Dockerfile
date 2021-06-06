@@ -4,5 +4,6 @@ WORKDIR /app
 
 COPY bin bin
 COPY lib lib
+COPY init.ls init.ls
 
 CMD ["java","-cp","bin:lib/*", "ch.ffhs.pm.fac.Linescript"]
