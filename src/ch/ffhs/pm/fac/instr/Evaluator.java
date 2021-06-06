@@ -38,6 +38,10 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitConstant(InstructionConstant instructionConstant) {
+        if (instructionConstant.value instanceof Instruction) {
+            Instruction instruction = (Instruction)instructionConstant.value;
+            return instruction.acceptVisitor(this);
+        }
         return instructionConstant.value;
     }
 
@@ -52,40 +56,47 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitSetVariable(InstructionSetVariable instructionSetVariable) {
-        if (instructionSetVariable.value.variableType == VariableType.NUMBER) {
-            BigDecimal evaluatedValue = (BigDecimal) instructionSetVariable.value.acceptVisitor(this);
-            BigDecimal existingValue = new BigDecimal(0);
-            Object exValue = context.get(instructionSetVariable.name);
-            if (exValue instanceof BigDecimal) {
-                existingValue = (BigDecimal)exValue;
+        if (instructionSetVariable.value instanceof InstructionConstant) {
+            InstructionConstant instructionConstant = (InstructionConstant)instructionSetVariable.value;
+            if (instructionConstant.variableType == VariableType.NUMBER) {
+                BigDecimal evaluatedValue = (BigDecimal) instructionSetVariable.value.acceptVisitor(this);
+                BigDecimal existingValue = new BigDecimal(0);
+                Object exValue = context.get(instructionSetVariable.name);
+                if (exValue instanceof BigDecimal) {
+                    existingValue = (BigDecimal)exValue;
+                }
+                switch (instructionSetVariable.assignOperator) {
+                    case ASSIGN:
+                        existingValue = evaluatedValue;
+                        break;
+                    case ASSIGN_PLUS:
+                        existingValue = existingValue.add(evaluatedValue);
+                        break;
+                    case ASSIGN_MINUS:
+                        existingValue = existingValue.add(new BigDecimal(-1 * evaluatedValue.doubleValue()));
+                        break;
+                    case ASSIGN_DIVIDE:
+                        existingValue = new BigDecimal(existingValue.doubleValue() / evaluatedValue.doubleValue());
+                        break;
+                    case ASSIGN_MUL:
+                        existingValue = new BigDecimal(existingValue.doubleValue() * evaluatedValue.doubleValue());
+                        break;
+                }
+                context.put(instructionSetVariable.name, existingValue);
+            } else if (instructionConstant.variableType == VariableType.STRING) {
+                String evaluatedValue = (String) instructionSetVariable.value.acceptVisitor(this);
+                for (String var : context.keySet()) {
+                    evaluatedValue = evaluatedValue.replaceAll(String.format("\\$\\{%s\\}", var), context.get(var).toString());
+                }
+                context.put(instructionSetVariable.name, evaluatedValue);
+            } else if (instructionConstant.variableType == VariableType.BOOLEAN) {
+                boolean evaluatedValue = (boolean) instructionSetVariable.value.acceptVisitor(this);
+                context.put(instructionSetVariable.name, evaluatedValue);
             }
-            switch (instructionSetVariable.assignOperator) {
-                case ASSIGN:
-                    existingValue = evaluatedValue;
-                    break;
-                case ASSIGN_PLUS:
-                    existingValue = existingValue.add(evaluatedValue);
-                    break;
-                case ASSIGN_MINUS:
-                    existingValue = existingValue.add(new BigDecimal(-1 * evaluatedValue.doubleValue()));
-                    break;
-                case ASSIGN_DIVIDE:
-                    existingValue = new BigDecimal(existingValue.doubleValue() / evaluatedValue.doubleValue());
-                    break;
-                case ASSIGN_MUL:
-                    existingValue = new BigDecimal(existingValue.doubleValue() * evaluatedValue.doubleValue());
-                    break;
-            }
-            context.put(instructionSetVariable.name, existingValue);
-        } else if (instructionSetVariable.value.variableType == VariableType.STRING) {
-            String evaluatedValue = (String) instructionSetVariable.value.acceptVisitor(this);
-            for (String var : context.keySet()) {
-                evaluatedValue = evaluatedValue.replaceAll(String.format("\\$\\{%s\\}", var), context.get(var).toString());
-            }
-            context.put(instructionSetVariable.name, evaluatedValue);
-        } else if (instructionSetVariable.value.variableType == VariableType.BOOLEAN) {
-            boolean evaluatedValue = (boolean) instructionSetVariable.value.acceptVisitor(this);
-            context.put(instructionSetVariable.name, evaluatedValue);
+        } else if (instructionSetVariable.value instanceof InstructionGetVariable) {
+            InstructionGetVariable instGetVar = (InstructionGetVariable)instructionSetVariable.value;
+            Object exValue = context.get(instGetVar.name);
+            context.put(instructionSetVariable.name, exValue);
         }
         return null;
     }
@@ -99,7 +110,7 @@ public class Evaluator implements InstructionVisitor<Object> {
                 return left.add(right);
             case MINUS:
                 return left.subtract(right);
-            case TIMES:
+            case MUL:
                 return left.multiply(right);
             case DIV:
                 return left.divide(right);

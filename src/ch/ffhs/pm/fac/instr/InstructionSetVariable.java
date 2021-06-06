@@ -5,9 +5,9 @@ public class InstructionSetVariable extends Instruction {
 
     final AssignOperator assignOperator;
 
-    final InstructionConstant value;
+    final Instruction value;
 
-    public InstructionSetVariable(String name, AssignOperator assignOperator, InstructionConstant value) {
+    public InstructionSetVariable(String name, AssignOperator assignOperator, Instruction value) {
         this.name = name;
         this.assignOperator = assignOperator;
         this.value = value;

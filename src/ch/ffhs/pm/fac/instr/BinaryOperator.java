@@ -4,7 +4,7 @@ public enum BinaryOperator
 {
     PLUS,
     MINUS,
-    TIMES,
+    MUL,
     DIV,
     MOD,
     POW

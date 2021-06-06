@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java_cup.runtime.*;
 import ch.ffhs.pm.fac.instr.*;
 
+terminal PLUS, MINUS, MUL, DIV, MOD, POW;
 terminal EQUAL, NOT_EQUAL, LESS_THAN, GREATER, LESS_EQUAL, GREATER_EQUAL;
 terminal ASSIGN, ASSIGN_PLUS, ASSIGN_MINUS, ASSIGN_MUL, ASSIGN_DIVIDE;
 terminal IF, ELSE, FUNC, WHILE, TERMINATOR, SEPARATOR, TRUE, FALSE, SEP;
@@ -23,6 +24,7 @@ non terminal ArrayList<Instruction> ARGUMENT_LIST;
 non terminal Instruction STATEMENT, ASSIGN_STATEMENT, BASIC_STATEMENT;
 non terminal Instruction IF_STATEMENT, ELSE_STATEMENT, CONDITIONAL_STATEMENT, WHILE_STATEMENT;
 non terminal Instruction FUNCTION_STATEMENT, FUNCTION_CALL_STATEMENT;
+non terminal Instruction ARITHMETIC_STATEMENT, NEGATE_STATEMENT;
 
 start with SCRIPT;
       
@@ -37,18 +39,17 @@ STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
             | IF_STATEMENT:is SEP {: RESULT = is; :}
             | WHILE_STATEMENT:ws SEP {: RESULT = ws; :}
             | FUNCTION_STATEMENT:fs SEP {: RESULT = fs; :}
-            | FUNCTION_CALL_STATEMENT:fcs {: RESULT = fcs; :};
+            | FUNCTION_CALL_STATEMENT:fcs {: RESULT = fcs; :}
+            | ARITHMETIC_STATEMENT:as {: RESULT = as; :};
 
 BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
-                   |  NUMBER:n {: RESULT = InstructionConstant.number(n); :}
-                   |  STRING:s {: RESULT = InstructionConstant.string(s); :}
-                   |  TRUE {: RESULT = InstructionConstant.bool(true); :}
-                   |  FALSE {: RESULT = InstructionConstant.bool(false); :};
+                  | NUMBER:n {: RESULT = InstructionConstant.number(n); :}
+                  | STRING:s {: RESULT = InstructionConstant.string(s); :}
+                  | TRUE {: RESULT = InstructionConstant.bool(true); :}
+                  | FALSE {: RESULT = InstructionConstant.bool(false); :}
+                  | NEGATE_STATEMENT:ns {: RESULT = InstructionConstant.instruction(ns); :};
 
-ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN STRING:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.string(s)); :}
-                   | IDENTIFIER:i ASSIGN TRUE {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.bool(true)); :}
-                   | IDENTIFIER:i ASSIGN FALSE {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  InstructionConstant.bool(false)); :}
+ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN BASIC_STATEMENT:bs {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  bs); :}
                    | IDENTIFIER:i ASSIGN_PLUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_MINUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
@@ -75,14 +76,20 @@ FUNCTION_CALL_STATEMENT ::= IDENTIFIER:i BRACKETS_LEFT ARGUMENT_LIST:al BRACKETS
 ARGUMENT_LIST ::= BASIC_STATEMENT:bs {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); :}
                 | BASIC_STATEMENT:bs SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); RESULT.addAll(al); :};
 
+
+ARITHMETIC_STATEMENT ::= BASIC_STATEMENT:bsl PLUS BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, bsl, bsr); :}
+                    //    | BASIC_STATEMENT:bsl NEGATE_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, bsl, bsr); :}
+                       | BASIC_STATEMENT:bsl MUL BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MUL, bsl, bsr); :}
+                       | BASIC_STATEMENT:bsl DIV BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, bsl, bsr); :}
+                       | BASIC_STATEMENT:bsl MOD BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, bsl, bsr); :}
+                       | BASIC_STATEMENT:bsl POW BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, bsl, bsr); :};
+
+NEGATE_STATEMENT ::= MINUS BASIC_STATEMENT:bs {: RESULT = new InstructionNegate(bs); :};
+
 END ::= 
      |  SEP
      ;
 
-// ASSIGNMENT ::= IDENTIFIER:i ASSIGN SUM:s SEP
-//                 {: RESULT = new InstructionSetVariable(i, s); :}
-//               ;
-           
        
 // SUM ::= PRODUCT:p
 //         {: RESULT = p; :}
