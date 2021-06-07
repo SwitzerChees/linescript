@@ -98,6 +98,9 @@ public class Evaluator implements InstructionVisitor<Object> {
         } else if (instructionSetVariable.value instanceof InstructionBinaryOperation) {
             InstructionBinaryOperation instBinaryOperation = (InstructionBinaryOperation)instructionSetVariable.value;
             context.put(instructionSetVariable.name, instBinaryOperation.acceptVisitor(this));
+        } else if (instructionSetVariable.value instanceof InstructionNegate) {
+            InstructionNegate instructionNegate = (InstructionNegate)instructionSetVariable.value;
+            context.put(instructionSetVariable.name, instructionNegate.acceptVisitor(this));
         } 
         return null;
     }
