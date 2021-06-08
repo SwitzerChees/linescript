@@ -101,6 +101,12 @@ public class Evaluator implements InstructionVisitor<Object> {
         } else if (instructionSetVariable.value instanceof InstructionNegate) {
             InstructionNegate instructionNegate = (InstructionNegate)instructionSetVariable.value;
             context.put(instructionSetVariable.name, instructionNegate.acceptVisitor(this));
+        } else if (instructionSetVariable.value instanceof InstructionIfStatement) {
+            InstructionIfStatement instructionIfElse = (InstructionIfStatement)instructionSetVariable.value;
+            Object ifelseValue = instructionIfElse.acceptVisitor(this);
+            if (ifelseValue != null) {
+                context.put(instructionSetVariable.name, ifelseValue);
+            }
         } 
         return null;
     }
@@ -176,14 +182,21 @@ public class Evaluator implements InstructionVisitor<Object> {
     }
 
     @Override
-    public Object visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement) {
+    public Object visitIfStatement(InstructionIfStatement instructionIfElseStatement) {
         Boolean conditionalStatement = (Boolean) instructionIfElseStatement.conditionalStatement.acceptVisitor(this);
         if (conditionalStatement) {
             return instructionIfElseStatement.ifStatement.acceptVisitor(this);
-        } else if (instructionIfElseStatement.elseStatement != null) {
-            return instructionIfElseStatement.elseStatement.acceptVisitor(this);
         }
         return null;
+    }
+
+    @Override
+    public Object visitElseStatement(InstructionElseStatement instructionElseStatement) {
+        Object ifResult = instructionElseStatement.ifStatement.acceptVisitor(this);
+        if (ifResult == null) {
+            return instructionElseStatement.elseStatement.acceptVisitor(this);
+        }
+        return ifResult;
     }
 
     @Override

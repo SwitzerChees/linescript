@@ -6,7 +6,9 @@ public interface InstructionVisitor<R>
 
     public R visitBinaryOperation(InstructionBinaryOperation instructionBinOperation);
 
-    public R visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement);
+    public R visitIfStatement(InstructionIfStatement instructionIfStatement);
+
+    public R visitElseStatement(InstructionElseStatement instructionElseStatement);
 
     public R visitWhileStatement(InstructionWhileStatement instructionWhileStatement);
 

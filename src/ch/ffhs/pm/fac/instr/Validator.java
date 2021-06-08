@@ -103,12 +103,16 @@ public class Validator implements InstructionVisitor<Object> {
     }
 
     @Override
-    public Object visitIfElseStatement(InstructionIfElseStatement instructionIfElseStatement) {
-        instructionIfElseStatement.conditionalStatement.acceptVisitor(this);
-        instructionIfElseStatement.ifStatement.acceptVisitor(this);
-        if (instructionIfElseStatement.elseStatement != null) {
-            instructionIfElseStatement.elseStatement.acceptVisitor(this);
-        }
+    public Object visitIfStatement(InstructionIfStatement instructionIfStatement) {
+        instructionIfStatement.conditionalStatement.acceptVisitor(this);
+        instructionIfStatement.ifStatement.acceptVisitor(this);
+        return null;
+    }
+
+    @Override
+    public Object visitElseStatement(InstructionElseStatement instructionElseStatement) {
+        instructionElseStatement.ifStatement.acceptVisitor(this);
+        instructionElseStatement.elseStatement.acceptVisitor(this);
         return null;
     }
 

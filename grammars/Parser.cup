@@ -36,9 +36,9 @@ STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
 STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
             | BASIC_STATEMENT:bs {: RESULT = bs; :}
             | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
-            
             | WHILE_STATEMENT:ws SEP {: RESULT = ws; :}
             | FUNCTION_STATEMENT:fs SEP {: RESULT = fs; :}
+            | ELSE_STATEMENT:es {: RESULT = es; :}
             | ARITHMETIC_STATEMENT:as {: RESULT = as; :};
 
 BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
@@ -57,9 +57,9 @@ ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN BASIC_STATEMENT:bs {: RESULT = new Inst
                    | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
                    | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
 
-IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:cs TERMINATOR BASIC_STATEMENT:bs {: RESULT = new InstructionIfElseStatement(cs, bs, null); :};
-//                | IF CONDITIONAL_STATEMENT:cs TERMINATOR BASIC_STATEMENT:bs ELSE_STATEMENT:es {: RESULT = new InstructionIfElseStatement(cs, bs, es); :};
-// ELSE_STATEMENT ::= ELSE TERMINATOR BASIC_STATEMENT:bs {: RESULT = bs; :};
+IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:cs TERMINATOR BASIC_STATEMENT:bs {: RESULT = new InstructionIfStatement(cs, bs); :};
+
+ELSE_STATEMENT ::= IF_STATEMENT:is ELSE TERMINATOR BASIC_STATEMENT:bs {: RESULT = new InstructionElseStatement(is, bs); :};
 
 CONDITIONAL_STATEMENT ::= BASIC_STATEMENT:bsl EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, bsl, bsr); :}
                         | BASIC_STATEMENT:bsl NOT_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, bsl, bsr); :}
@@ -78,8 +78,9 @@ PARAMETER_LIST ::= {: RESULT = new ArrayList<String>(); :}
 FUNCTION_CALL_STATEMENT ::= IDENTIFIER:i BRACKETS_LEFT ARGUMENT_LIST:al BRACKETS_RIGHT {: RESULT = new InstructionFuncCallStatement(i, al); :};
 ARGUMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
                 | BASIC_STATEMENT:bs {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); :}
+                | ARITHMETIC_STATEMENT:as {: RESULT = new ArrayList<Instruction>(Arrays.asList(as)); :}
+                | ARITHMETIC_STATEMENT:as SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(as)); RESULT.addAll(al); :}
                 | BASIC_STATEMENT:bs SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); RESULT.addAll(al); :};
-
 
 ARITHMETIC_STATEMENT ::= BASIC_STATEMENT:bsl PLUS BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, bsl, bsr); :}
                        | BASIC_STATEMENT:bsl MINUS BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, bsl, bsr); :}
