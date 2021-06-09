@@ -272,6 +272,17 @@ public class Evaluator implements InstructionVisitor<Object> {
             System.out.println("Bye! 👋");
             System.exit(0);
         }
+        else if (funcStatement.name.equals("print")){
+            ArrayList<Object> results = new ArrayList<Object>();
+            for (Instruction instr : instructionFuncCallStatement.statements) {
+                Object result = instr.acceptVisitor(this);
+                if (result != null) {
+                    results.add(result);
+                }
+            }
+            System.out.println(String.join(" ", results.stream().map(Object::toString).toArray(String[]::new)));
+            return null;
+        }
         Map<String, Object> funcContext = new HashMap<String, Object>();
         for (int i = 0; i < funcStatement.parameters.size(); i++) {
             funcContext.put(funcStatement.parameters.get(i),

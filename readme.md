@@ -157,14 +157,18 @@ if 1 == 2: res = "Yes" else: res = "No"
 sum = lambda a,b: a + b
 sum(1, 2)
 
+# Integrated Exit Function
+exit()
+
+# Integrated Print Function
+name = "John Doe"
+print("Hello", name)
+
 # Recursive Fibonacci Number Function
 fibo = lambda n: if n <= 1: n else: fibo(n - 1) + fibo(n - 2)
 # Calculates the first 20 numbers of the Fibonacci sequence
 i = 0
-while i <= 20: fibo(i), i += 1
-
-# Integrated Exit Function
-exit()
+while i <= 20: print("${i}th Fibonacci number:", fibo(i)), i += 1
 ```
 
 ## 📜 License
