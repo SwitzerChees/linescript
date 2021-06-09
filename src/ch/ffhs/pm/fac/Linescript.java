@@ -45,9 +45,6 @@ public class Linescript {
                         script = reader.readLine("> ");
                     }
                     script += '\n';
-                    if (script.trim().length() == 0) {
-                        continue;
-                    } 
                     Parser parser = new Parser(new Scanner(new StringReader(script)));
                     Symbol symbol = parser.parse();
                     Instruction instr = (Instruction) symbol.value;

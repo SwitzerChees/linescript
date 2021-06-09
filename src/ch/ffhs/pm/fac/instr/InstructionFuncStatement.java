@@ -8,12 +8,12 @@ public class InstructionFuncStatement extends Instruction {
 
     final ArrayList<String> parameters;
 
-    final Instruction statement;
+    final ArrayList<Instruction> statementList;
 
-    public InstructionFuncStatement(String name, ArrayList<String> parameters, Instruction statement) {
+    public InstructionFuncStatement(String name, ArrayList<String> parameters, ArrayList<Instruction> statementList) {
         this.name = name;
         this.parameters = parameters;
-        this.statement = statement;
+        this.statementList = statementList;
     }
 
     @Override

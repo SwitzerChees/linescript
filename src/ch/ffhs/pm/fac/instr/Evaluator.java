@@ -1,6 +1,7 @@
 package ch.ffhs.pm.fac.instr;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class Evaluator implements InstructionVisitor<Object> {
     @Override
     public Object visitConstant(InstructionConstant instructionConstant) {
         if (instructionConstant.value instanceof Instruction) {
-            Instruction instruction = (Instruction)instructionConstant.value;
+            Instruction instruction = (Instruction) instructionConstant.value;
             return instruction.acceptVisitor(this);
         }
         return instructionConstant.value;
@@ -54,14 +55,15 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitSetVariable(InstructionSetVariable instructionSetVariable) {
-        if (instructionSetVariable.value instanceof InstructionConstant) {
-            InstructionConstant instructionConstant = (InstructionConstant)instructionSetVariable.value;
-            if (instructionConstant.variableType == VariableType.NUMBER) {
-                BigDecimal evaluatedValue = (BigDecimal) instructionSetVariable.value.acceptVisitor(this);
+        if (instructionSetVariable.value instanceof InstructionConstant
+                || instructionSetVariable.value instanceof InstructionGetVariable) {
+            Object setValue = instructionSetVariable.value.acceptVisitor(this);
+            if (setValue instanceof BigDecimal) {
+                BigDecimal evaluatedValue = (BigDecimal) setValue;
                 BigDecimal existingValue = new BigDecimal(0);
                 Object exValue = context.get(instructionSetVariable.name);
                 if (exValue instanceof BigDecimal) {
-                    existingValue = (BigDecimal)exValue;
+                    existingValue = (BigDecimal) exValue;
                 }
                 switch (instructionSetVariable.assignOperator) {
                     case ASSIGN:
@@ -81,33 +83,36 @@ public class Evaluator implements InstructionVisitor<Object> {
                         break;
                 }
                 context.put(instructionSetVariable.name, existingValue);
-            } else if (instructionConstant.variableType == VariableType.STRING) {
+            } else if (setValue instanceof String) {
                 String evaluatedValue = (String) instructionSetVariable.value.acceptVisitor(this);
                 for (String var : context.keySet()) {
-                    evaluatedValue = evaluatedValue.replaceAll(String.format("\\$\\{%s\\}", var), context.get(var).toString());
+                    evaluatedValue = evaluatedValue.replaceAll(String.format("\\$\\{%s\\}", var),
+                            context.get(var).toString());
                 }
                 context.put(instructionSetVariable.name, evaluatedValue);
-            } else if (instructionConstant.variableType == VariableType.BOOLEAN) {
+            } else if (setValue instanceof Boolean) {
                 boolean evaluatedValue = (boolean) instructionSetVariable.value.acceptVisitor(this);
                 context.put(instructionSetVariable.name, evaluatedValue);
             }
-        } else if (instructionSetVariable.value instanceof InstructionGetVariable) {
-            InstructionGetVariable instGetVar = (InstructionGetVariable)instructionSetVariable.value;
-            Object exValue = context.get(instGetVar.name);
-            context.put(instructionSetVariable.name, exValue);
         } else if (instructionSetVariable.value instanceof InstructionBinaryOperation) {
-            InstructionBinaryOperation instBinaryOperation = (InstructionBinaryOperation)instructionSetVariable.value;
+            InstructionBinaryOperation instBinaryOperation = (InstructionBinaryOperation) instructionSetVariable.value;
             context.put(instructionSetVariable.name, instBinaryOperation.acceptVisitor(this));
         } else if (instructionSetVariable.value instanceof InstructionNegate) {
-            InstructionNegate instructionNegate = (InstructionNegate)instructionSetVariable.value;
+            InstructionNegate instructionNegate = (InstructionNegate) instructionSetVariable.value;
             context.put(instructionSetVariable.name, instructionNegate.acceptVisitor(this));
         } else if (instructionSetVariable.value instanceof InstructionIfStatement) {
-            InstructionIfStatement instructionIfElse = (InstructionIfStatement)instructionSetVariable.value;
+            InstructionIfStatement instructionIfElse = (InstructionIfStatement) instructionSetVariable.value;
             Object ifelseValue = instructionIfElse.acceptVisitor(this);
             if (ifelseValue != null) {
                 context.put(instructionSetVariable.name, ifelseValue);
             }
-        } 
+        } else if (instructionSetVariable.value instanceof InstructionFuncCallStatement) {
+            InstructionFuncCallStatement instructionFuncCall = (InstructionFuncCallStatement) instructionSetVariable.value;
+            ArrayList<?> funcResult = (ArrayList<?>) instructionFuncCall.acceptVisitor(this);
+            if (funcResult.size() > 0) {
+                context.put(instructionSetVariable.name, funcResult);
+            }
+        }
         return null;
     }
 
@@ -123,7 +128,7 @@ public class Evaluator implements InstructionVisitor<Object> {
             case MUL:
                 return left.multiply(right);
             case DIV:
-                return left.divide(right);
+                return left.divide(right, MathContext.DECIMAL128);
             case MOD:
                 return new BigDecimal(left.toBigInteger().mod(right.toBigInteger()));
             case POW:
@@ -223,10 +228,11 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitScript(InstructionScript instructionScript) {
+        Object result = null;
         for (Instruction instr : instructionScript.assignments) {
-            instr.acceptVisitor(this);
+            result = instr.acceptVisitor(this);
         }
-        return instructionScript.lastInstruction.acceptVisitor(this);
+        return result;
     }
 
     @Override
@@ -237,19 +243,28 @@ public class Evaluator implements InstructionVisitor<Object> {
 
     @Override
     public Object visitFuncCallStatement(InstructionFuncCallStatement instructionFuncCallStatement) {
-        Map<String, Object> funcContext = new HashMap<String, Object>();
         InstructionFuncStatement funcStatement = (InstructionFuncStatement) context
-                .get(instructionFuncCallStatement.name);
+        .get(instructionFuncCallStatement.name);
+        if (funcStatement.name.equals("exit")) {
+            System.out.println("Bye! 👋");
+            System.exit(0);
+        }
+        Map<String, Object> funcContext = new HashMap<String, Object>();
         for (int i = 0; i < funcStatement.parameters.size(); i++) {
             funcContext.put(funcStatement.parameters.get(i),
                     instructionFuncCallStatement.statements.get(i).acceptVisitor(this));
         }
+        funcContext.put(instructionFuncCallStatement.name, funcStatement);
         Evaluator evaluator = new Evaluator(funcContext);
-        if (funcStatement.name.equals("exit")) {
-            int statusCode = Integer.parseInt(funcStatement.statement.acceptVisitor(evaluator).toString());
-            System.out.println("Bye! 👋");
-            System.exit(statusCode);
+        ArrayList<Object> results = new ArrayList<Object>();
+        for (Instruction instr : funcStatement.statementList) {
+            Object result = instr.acceptVisitor(evaluator);
+            if (result != null) {
+                results.add(result);
+            }
         }
-        return funcStatement.statement.acceptVisitor(evaluator);
+        if (results.size() == 0 || results.size() > 1)
+            return results;
+        return results.get(0);
     }
 }

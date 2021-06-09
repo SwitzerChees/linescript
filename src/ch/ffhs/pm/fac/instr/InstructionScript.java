@@ -6,13 +6,10 @@ public class InstructionScript extends Instruction
 {
 
     final List<Instruction> assignments;
-    
-    final Instruction lastInstruction;
         
-    public InstructionScript(List<Instruction> assignments, Instruction lastInstruction)
+    public InstructionScript(List<Instruction> assignments)
     {
         this.assignments = assignments;
-        this.lastInstruction = lastInstruction;
     }
     
     

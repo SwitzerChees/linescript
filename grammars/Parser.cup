@@ -21,77 +21,112 @@ non terminal END;
 non terminal ArrayList<Instruction> STATEMENT_LIST;
 non terminal ArrayList<String> PARAMETER_LIST;
 non terminal ArrayList<Instruction> ARGUMENT_LIST;
-non terminal Instruction STATEMENT, ASSIGN_STATEMENT, BASIC_STATEMENT;
+non terminal Instruction STATEMENT, ASSIGN_STATEMENT, BASIC_STATEMENT, CONSTANT_STATEMENT;
 non terminal Instruction IF_STATEMENT, ELSE_STATEMENT, CONDITIONAL_STATEMENT, WHILE_STATEMENT;
 non terminal Instruction FUNCTION_STATEMENT, FUNCTION_CALL_STATEMENT;
-non terminal Instruction ARITHMETIC_STATEMENT, NEGATE_STATEMENT;
+non terminal Instruction ARITHMETIC_STATEMENT, ADVANCED_STATEMENT;
+
+precedence left PLUS, MINUS;
+precedence left MUL, DIV, MOD, POW;
+precedence left IF, ELSE;
+precedence left WHILE, TERMINATOR, SEPARATOR;
 
 start with SCRIPT;
       
-SCRIPT ::= STATEMENT_LIST:sl STATEMENT:s END {: RESULT = new InstructionScript(sl, s); :};
+SCRIPT ::= STATEMENT_LIST:sl END {: RESULT = new InstructionScript(sl); :};
                
 STATEMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
-                 | STATEMENT_LIST:sl STATEMENT:s {: RESULT = sl; RESULT.add(s); :};
+                 | STATEMENT_LIST:sl STATEMENT:s {: RESULT = sl; RESULT.add(s); :}
+                 | STATEMENT_LIST:sl SEPARATOR STATEMENT:s {: RESULT = sl; RESULT.add(s); :}
+                 | STATEMENT_LIST:sl SEP {: RESULT = sl; :};
 
-STATEMENT ::= ASSIGN_STATEMENT:as {: RESULT = as; :}
+STATEMENT ::= CONSTANT_STATEMENT:cs {: RESULT = cs; :}
             | BASIC_STATEMENT:bs {: RESULT = bs; :}
-            | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
-            | WHILE_STATEMENT:ws SEP {: RESULT = ws; :}
-            | FUNCTION_STATEMENT:fs SEP {: RESULT = fs; :}
-            | ELSE_STATEMENT:es {: RESULT = es; :}
-            | ARITHMETIC_STATEMENT:as {: RESULT = as; :};
+            | ADVANCED_STATEMENT:as {: RESULT = as; :};
 
-BASIC_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
-                  | NUMBER:n {: RESULT = InstructionConstant.number(n); :}
-                  | STRING:s {: RESULT = InstructionConstant.string(s); :}
-                  | TRUE {: RESULT = InstructionConstant.bool(true); :}
-                  | FALSE {: RESULT = InstructionConstant.bool(false); :}
+CONSTANT_STATEMENT ::= IDENTIFIER:i {: RESULT = new InstructionGetVariable(i); :}
+                     | STRING:s {: RESULT = InstructionConstant.string(s); :}
+                     | TRUE {: RESULT = InstructionConstant.bool(true); :}
+                     | FALSE {: RESULT = InstructionConstant.bool(false); :}
+                     | NUMBER:n {: RESULT = InstructionConstant.number(n); :};
+
+BASIC_STATEMENT ::= ARITHMETIC_STATEMENT:as {: RESULT = as; :}
+                  | CONDITIONAL_STATEMENT:cs {: RESULT = cs; :}
                   | IF_STATEMENT:is {: RESULT = is; :}
+                  | ELSE_STATEMENT:es {: RESULT = es; :}
+                  | ASSIGN_STATEMENT:as {: RESULT = as; :}
                   | FUNCTION_CALL_STATEMENT:fcs {: RESULT = fcs; :};
 
-ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN BASIC_STATEMENT:bs {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  bs); :}
-                   | IDENTIFIER:i ASSIGN ARITHMETIC_STATEMENT:as {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  as); :}
-                   | IDENTIFIER:i ASSIGN NEGATE_STATEMENT:ns {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  ns); :}
-                   | IDENTIFIER:i ASSIGN_PLUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN_MINUS NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN_MUL NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  InstructionConstant.number(n)); :}
-                   | IDENTIFIER:i ASSIGN_DIVIDE NUMBER:n {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  InstructionConstant.number(n)); :};
+ADVANCED_STATEMENT ::= WHILE_STATEMENT:ws SEP {: RESULT = ws; :}
+                     | FUNCTION_STATEMENT:fs SEP {: RESULT = fs; :};
 
-IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:cs TERMINATOR BASIC_STATEMENT:bs {: RESULT = new InstructionIfStatement(cs, bs); :};
+ARITHMETIC_STATEMENT ::= CONSTANT_STATEMENT:csl PLUS CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, csl, csr); :}
+                       | CONSTANT_STATEMENT:csl MINUS CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, csl, csr); :}
+                       | CONSTANT_STATEMENT:csl MUL CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MUL, csl, csr); :}
+                       | CONSTANT_STATEMENT:csl DIV CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, csl, csr); :}
+                       | CONSTANT_STATEMENT:csl MOD CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, csl, csr); :}
+                       | CONSTANT_STATEMENT:csl POW CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, csl, csr); :}
+                       | ARITHMETIC_STATEMENT:asl PLUS CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, asl, csr); :}
+                       | ARITHMETIC_STATEMENT:asl MINUS CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, asl, csr); :}
+                       | ARITHMETIC_STATEMENT:asl MUL CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MUL, asl, csr); :}
+                       | ARITHMETIC_STATEMENT:asl DIV CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, asl, csr); :}
+                       | ARITHMETIC_STATEMENT:asl MOD CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, asl, csr); :}
+                       | ARITHMETIC_STATEMENT:asl POW CONSTANT_STATEMENT:csr {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, asl, csr); :}
+                       | CONSTANT_STATEMENT:csl PLUS ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, csl, asr); :}
+                       | CONSTANT_STATEMENT:csl MINUS ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, csl, asr); :}
+                       | CONSTANT_STATEMENT:csl MUL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MUL, csl, asr); :}
+                       | CONSTANT_STATEMENT:csl DIV ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, csl, asr); :}
+                       | CONSTANT_STATEMENT:csl MOD ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, csl, asr); :}
+                       | CONSTANT_STATEMENT:csl POW ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, csl, asr); :}
+                       | FUNCTION_CALL_STATEMENT:fcsl PLUS FUNCTION_CALL_STATEMENT:fcsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, fcsl, fcsr); :};
 
-ELSE_STATEMENT ::= IF_STATEMENT:is ELSE TERMINATOR BASIC_STATEMENT:bs {: RESULT = new InstructionElseStatement(is, bs); :};
+CONDITIONAL_STATEMENT ::= CONSTANT_STATEMENT:csl EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, csl, csr); :}
+                        | CONSTANT_STATEMENT:csl NOT_EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, csl, csr); :}
+                        | CONSTANT_STATEMENT:csl LESS_THAN CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, csl, csr); :}
+                        | CONSTANT_STATEMENT:csl GREATER CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, csl, csr); :}
+                        | CONSTANT_STATEMENT:csl LESS_EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, csl, csr); :}
+                        | CONSTANT_STATEMENT:csl GREATER_EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, csl, csr); :}
+                        | ARITHMETIC_STATEMENT:asl EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, asl, csr); :}
+                        | ARITHMETIC_STATEMENT:asl NOT_EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, asl, csr); :}
+                        | ARITHMETIC_STATEMENT:asl LESS_THAN CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, asl, csr); :}
+                        | ARITHMETIC_STATEMENT:asl GREATER CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, asl, csr); :}
+                        | ARITHMETIC_STATEMENT:asl LESS_EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, asl, csr); :}
+                        | ARITHMETIC_STATEMENT:asl GREATER_EQUAL CONSTANT_STATEMENT:csr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, asl, csr); :}
+                        | CONSTANT_STATEMENT:csl EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, csl, asr); :}
+                        | CONSTANT_STATEMENT:csl NOT_EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, csl, asr); :}
+                        | CONSTANT_STATEMENT:csl LESS_THAN ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, csl, asr); :}
+                        | CONSTANT_STATEMENT:csl GREATER ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, csl, asr); :}
+                        | CONSTANT_STATEMENT:csl LESS_EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, csl, asr); :}
+                        | CONSTANT_STATEMENT:csl GREATER_EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, csl, asr); :}
+                        | ARITHMETIC_STATEMENT:asl EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, asl, asr); :}
+                        | ARITHMETIC_STATEMENT:asl NOT_EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, asl, asr); :}
+                        | ARITHMETIC_STATEMENT:asl LESS_THAN ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, asl, asr); :}
+                        | ARITHMETIC_STATEMENT:asl GREATER ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, asl, asr); :}
+                        | ARITHMETIC_STATEMENT:asl LESS_EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, asl, asr); :}
+                        | ARITHMETIC_STATEMENT:asl GREATER_EQUAL ARITHMETIC_STATEMENT:asr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, asl, asr); :};
 
-CONDITIONAL_STATEMENT ::= BASIC_STATEMENT:bsl EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.EQUAL, bsl, bsr); :}
-                        | BASIC_STATEMENT:bsl NOT_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.NOT_EQUAL, bsl, bsr); :}
-                        | BASIC_STATEMENT:bsl LESS_THAN BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_THAN, bsl, bsr); :}
-                        | BASIC_STATEMENT:bsl GREATER BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER, bsl, bsr); :}
-                        | BASIC_STATEMENT:bsl LESS_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.LESS_EQUAL, bsl, bsr); :}
-                        | BASIC_STATEMENT:bsl GREATER_EQUAL BASIC_STATEMENT:bsr {: RESULT = new InstructionConditionalStatement(ConditionalExpression.GREATER_EQUAL, bsl, bsr); :};
+IF_STATEMENT ::= IF CONDITIONAL_STATEMENT:cs TERMINATOR STATEMENT:s {: RESULT = new InstructionIfStatement(cs, s); :};
+
+ELSE_STATEMENT ::= IF_STATEMENT:is ELSE TERMINATOR STATEMENT:s {: RESULT = new InstructionElseStatement(is, s); :};
+
+ASSIGN_STATEMENT ::= IDENTIFIER:i ASSIGN STATEMENT:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN,  s); :}
+                   | IDENTIFIER:i ASSIGN_PLUS STATEMENT:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_PLUS,  s); :}
+                   | IDENTIFIER:i ASSIGN_MINUS STATEMENT:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MINUS,  s); :}
+                   | IDENTIFIER:i ASSIGN_MUL STATEMENT:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_MUL,  s); :}
+                   | IDENTIFIER:i ASSIGN_DIVIDE STATEMENT:s {: RESULT = new InstructionSetVariable(i, AssignOperator.ASSIGN_DIVIDE,  s); :};
 
 WHILE_STATEMENT ::= WHILE CONDITIONAL_STATEMENT:cs TERMINATOR ARGUMENT_LIST:al {: RESULT = new InstructionWhileStatement(cs, al); :};
+ARGUMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
+                | CONSTANT_STATEMENT:cs {: RESULT = new ArrayList<Instruction>(Arrays.asList(cs)); :}
+                | BASIC_STATEMENT:bs {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); :}
+                | CONSTANT_STATEMENT:cs SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(cs)); RESULT.addAll(al); :}
+                | BASIC_STATEMENT:bs SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); RESULT.addAll(al); :};
 
-FUNCTION_STATEMENT ::= IDENTIFIER:i ASSIGN FUNC PARAMETER_LIST:pl TERMINATOR STATEMENT:s {: RESULT = new InstructionFuncStatement(i, pl, s); :};
+FUNCTION_STATEMENT ::= IDENTIFIER:i ASSIGN FUNC PARAMETER_LIST:pl TERMINATOR ARGUMENT_LIST:al {: RESULT = new InstructionFuncStatement(i, pl, al); :};
 PARAMETER_LIST ::= {: RESULT = new ArrayList<String>(); :}
                  | IDENTIFIER:i {: RESULT = new ArrayList<String>(Arrays.asList(i)); :}
                  | IDENTIFIER:i SEPARATOR PARAMETER_LIST:pl {: RESULT = new ArrayList<String>(Arrays.asList(i)); RESULT.addAll(pl); :};
 
 FUNCTION_CALL_STATEMENT ::= IDENTIFIER:i BRACKETS_LEFT ARGUMENT_LIST:al BRACKETS_RIGHT {: RESULT = new InstructionFuncCallStatement(i, al); :};
-ARGUMENT_LIST ::= {: RESULT = new ArrayList<Instruction>(); :}
-                | BASIC_STATEMENT:bs {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); :}
-                | ARITHMETIC_STATEMENT:as {: RESULT = new ArrayList<Instruction>(Arrays.asList(as)); :}
-                | ARITHMETIC_STATEMENT:as SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(as)); RESULT.addAll(al); :}
-                | BASIC_STATEMENT:bs SEPARATOR ARGUMENT_LIST:al {: RESULT = new ArrayList<Instruction>(Arrays.asList(bs)); RESULT.addAll(al); :};
 
-ARITHMETIC_STATEMENT ::= BASIC_STATEMENT:bsl PLUS BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.PLUS, bsl, bsr); :}
-                       | BASIC_STATEMENT:bsl MINUS BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, bsl, bsr); :}
-                       | BASIC_STATEMENT:bsl MINUS NEGATE_STATEMENT:nsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MINUS, bsl, nsr); :}
-                       | BASIC_STATEMENT:bsl MUL BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MUL, bsl, bsr); :}
-                       | BASIC_STATEMENT:bsl DIV BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.DIV, bsl, bsr); :}
-                       | BASIC_STATEMENT:bsl MOD BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.MOD, bsl, bsr); :}
-                       | BASIC_STATEMENT:bsl POW BASIC_STATEMENT:bsr {: RESULT = new InstructionBinaryOperation(BinaryOperator.POW, bsl, bsr); :};
-
-NEGATE_STATEMENT ::= MINUS BASIC_STATEMENT:bs {: RESULT = new InstructionNegate(bs); :};
-
-END ::= 
-     |  SEP
-     ;
+END ::= ;

@@ -54,7 +54,6 @@ public class Validator implements InstructionVisitor<Object> {
         for (Instruction instr : instructionScript.assignments) {
             instr.acceptVisitor(this);
         }
-        instructionScript.lastInstruction.acceptVisitor(this);
         return null;
     }
 

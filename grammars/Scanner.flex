@@ -67,11 +67,11 @@ COMMENT   = "//".*
 "*="    { return sym(ASSIGN_MUL); }
 "/="    { return sym(ASSIGN_DIVIDE); }
 
-[0-9]+                                  { return symVal(NUMBER); }
-[0-9]+\.                                { return symVal(NUMBER); }
-[0-9]+\.[0-9]+                          { return symVal(NUMBER); }
-\".*\"                                  { return symVal(STRING); }
-([:jletter:]|_)([:jletterdigit:]|_)*	{ return symVal(IDENTIFIER); }
+\-?[0-9]+                                  { return symVal(NUMBER); }
+\-?[0-9]+\.                                { return symVal(NUMBER); }
+\-?[0-9]+\.[0-9]+                          { return symVal(NUMBER); }
+\"[^\"]*\"                                 { return symVal(STRING); }
+([:jletter:]|_)([:jletterdigit:]|_)*	   { return symVal(IDENTIFIER); }
 
 {BREAK} { return sym(SEP); }
 {OPT_SPACE}	{ }
