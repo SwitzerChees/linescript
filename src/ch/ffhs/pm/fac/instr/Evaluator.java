@@ -1,6 +1,7 @@
 package ch.ffhs.pm.fac.instr;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -130,7 +131,10 @@ public class Evaluator implements InstructionVisitor<Object> {
             case DIV:
                 return left.divide(right, MathContext.DECIMAL128);
             case MOD:
-                return new BigDecimal(left.toBigInteger().mod(right.toBigInteger()));
+                BigInteger intValue = left.toBigInteger();
+                if (new BigDecimal(intValue).equals(left))
+                    return new BigDecimal(intValue.mod(right.toBigInteger()));
+                return new BigDecimal(intValue.mod(right.toBigInteger())).subtract(new BigDecimal(intValue)).add(left);
             case POW:
                 return left.pow(right.intValue());
             default:
@@ -244,7 +248,7 @@ public class Evaluator implements InstructionVisitor<Object> {
     @Override
     public Object visitFuncCallStatement(InstructionFuncCallStatement instructionFuncCallStatement) {
         InstructionFuncStatement funcStatement = (InstructionFuncStatement) context
-        .get(instructionFuncCallStatement.name);
+                .get(instructionFuncCallStatement.name);
         if (funcStatement.name.equals("exit")) {
             System.out.println("Bye! 👋");
             System.exit(0);
