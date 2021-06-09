@@ -42,6 +42,14 @@ public class Evaluator implements InstructionVisitor<Object> {
             Instruction instruction = (Instruction) instructionConstant.value;
             return instruction.acceptVisitor(this);
         }
+        if (instructionConstant.value instanceof String) {
+            String evaluatedValue = (String) instructionConstant.value;
+            for (String var : context.keySet()) {
+                evaluatedValue = evaluatedValue.replaceAll(String.format("\\$\\{%s\\}", var),
+                        context.get(var).toString());
+            }
+            return evaluatedValue;
+        }
         return instructionConstant.value;
     }
 
@@ -102,11 +110,22 @@ public class Evaluator implements InstructionVisitor<Object> {
             InstructionNegate instructionNegate = (InstructionNegate) instructionSetVariable.value;
             context.put(instructionSetVariable.name, instructionNegate.acceptVisitor(this));
         } else if (instructionSetVariable.value instanceof InstructionIfStatement) {
-            InstructionIfStatement instructionIfElse = (InstructionIfStatement) instructionSetVariable.value;
-            Object ifelseValue = instructionIfElse.acceptVisitor(this);
-            if (ifelseValue != null) {
-                context.put(instructionSetVariable.name, ifelseValue);
+            InstructionIfStatement instructionIf = (InstructionIfStatement) instructionSetVariable.value;
+            Object ifValue = instructionIf.acceptVisitor(this);
+            if (ifValue != null) {
+                context.put(instructionSetVariable.name, ifValue);
             }
+        } else if (instructionSetVariable.value instanceof InstructionElseStatement) {
+            InstructionElseStatement instructionElse = (InstructionElseStatement) instructionSetVariable.value;
+            Object elseValue = instructionElse.acceptVisitor(this);
+            if (elseValue != null) {
+                context.put(instructionSetVariable.name, elseValue);
+            }
+
+        } else if (instructionSetVariable.value instanceof InstructionConditionalStatement) {
+            InstructionConditionalStatement instructionCond = (InstructionConditionalStatement) instructionSetVariable.value;
+            Object condValue = instructionCond.acceptVisitor(this);
+            context.put(instructionSetVariable.name, condValue);
         } else if (instructionSetVariable.value instanceof InstructionFuncCallStatement) {
             InstructionFuncCallStatement instructionFuncCall = (InstructionFuncCallStatement) instructionSetVariable.value;
             ArrayList<?> funcResult = (ArrayList<?>) instructionFuncCall.acceptVisitor(this);

@@ -30,16 +30,16 @@ import java_cup.runtime.Symbol;
 
 OPT_SPACE = [ \t]+
 BREAK     = [\n\r]+
-COMMENT   = "//".*
+COMMENT   = "#".*
 %%
 
 "if"    { return sym(IF); }
 "else"  { return sym(ELSE); }
-"func"  { return sym(FUNC); }
+"lambda"  { return sym(FUNC); }
 "while" { return sym(WHILE); }
 
-"true"  { return sym(TRUE); }
-"false" { return sym(FALSE); }
+"True"  { return sym(TRUE); }
+"False" { return sym(FALSE); }
 
 ":"     { return sym(TERMINATOR); }
 ","     { return sym(SEPARATOR); }

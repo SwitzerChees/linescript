@@ -17,10 +17,10 @@ public class LinescriptHighlighter implements Highlighter {
         KEYWORDS = new ArrayList<String>();
         KEYWORDS.add("if");
         KEYWORDS.add("else");
-        KEYWORDS.add("func");
+        KEYWORDS.add("lambda");
         KEYWORDS.add("while");
-        KEYWORDS.add("true");
-        KEYWORDS.add("false");
+        KEYWORDS.add("True");
+        KEYWORDS.add("False");
         OPERATIONS = new ArrayList<Character>();
         OPERATIONS.add(':');
         OPERATIONS.add(',');
@@ -41,7 +41,7 @@ public class LinescriptHighlighter implements Highlighter {
         if (buffer == null || buffer.isEmpty()) {
             return list;
         }
-        if (buffer.trim().startsWith("//")) {
+        if (buffer.trim().startsWith("#")) {
             list.add(buffer);
         } else {
             boolean prevIsSpace = Character.isSpaceChar(buffer.charAt(0));
@@ -97,12 +97,12 @@ public class LinescriptHighlighter implements Highlighter {
     }
 
     private boolean isComment(String token) {
-        return token.trim().startsWith("//");
+        return token.trim().startsWith("#");
     }
 
     private boolean isKeyword(String token) {
         for (String keyword : KEYWORDS) {
-            if (keyword.compareToIgnoreCase(token) == 0)
+            if (keyword.compareTo(token) == 0)
                 return true;
         }
         return false;
