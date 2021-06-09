@@ -18,6 +18,9 @@ public class Evaluator implements InstructionVisitor<Object> {
     /** Eine Map mit Namen-Wert Paaren für Variable */
     private Map<String, Object> context;
 
+    static final String BOLD = "\033[1m";
+    static final String NORMAL = "\033[0m";
+
     /**
      * Erzeugt einen Evaluator mit leerem Context und leerer FunktionsLibrary.
      */
@@ -272,7 +275,7 @@ public class Evaluator implements InstructionVisitor<Object> {
             System.out.println("Bye! 👋");
             System.exit(0);
         }
-        else if (funcStatement.name.equals("print")){
+        else if (funcStatement.name.equals("print") || funcStatement.name.equals("printb")){
             ArrayList<Object> results = new ArrayList<Object>();
             for (Instruction instr : instructionFuncCallStatement.statements) {
                 Object result = instr.acceptVisitor(this);
@@ -280,7 +283,12 @@ public class Evaluator implements InstructionVisitor<Object> {
                     results.add(result);
                 }
             }
-            System.out.println(String.join(" ", results.stream().map(Object::toString).toArray(String[]::new)));
+            
+            if (funcStatement.name.equals("printb")) {
+                System.out.println(BOLD + String.join(" ", results.stream().map(Object::toString).toArray(String[]::new)) + NORMAL);
+            } else {
+                System.out.println(String.join(" ", results.stream().map(Object::toString).toArray(String[]::new)));
+            }
             return null;
         }
         Map<String, Object> funcContext = new HashMap<String, Object>();

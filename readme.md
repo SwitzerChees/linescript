@@ -9,11 +9,18 @@
 ### 🔥 Demo / Try it out
 
 If you want to test the language you can easily do that by just execute the official docker image.
-
-```
+```bash
+# Interactive Mode
 docker run -it switzerchees/linescript:latest
-```
 
+# Script Interpreter Mode executes the example.ls file
+docker run -it -v "$PWD/example.ls":/app/example.ls switzerchees/linescript:latest example.ls
+```
+### ⚡ Interactive Mode 🚨 HIGLIGHTS🚨!!!
+
+* \<tab\> Autocompletion (Variables and Functions)
+* Syntax Highlighting
+* Statement History
 ### ♾️ Dependencies
 
 * \>= java 15 (major version 59).
@@ -168,7 +175,8 @@ print("Hello", name)
 fibo = lambda n: if n <= 1: n else: fibo(n - 1) + fibo(n - 2)
 # Calculates the first 20 numbers of the Fibonacci sequence
 i = 0
-while i <= 20: print("${i}th Fibonacci number:", fibo(i)), i += 1
+end = 20
+while i <= end: "${i}th Fibonacci number", fibo(i), i += 1
 ```
 
 ## 📜 License
