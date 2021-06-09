@@ -27,7 +27,8 @@ non terminal Instruction FUNCTION_STATEMENT, FUNCTION_CALL_STATEMENT;
 non terminal Instruction ARITHMETIC_STATEMENT, ADVANCED_STATEMENT;
 
 precedence left PLUS, MINUS;
-precedence left MUL, DIV, MOD, POW;
+precedence left MOD, MUL;
+precedence left DIV, POW;
 precedence left IF, ELSE;
 precedence left WHILE, TERMINATOR, SEPARATOR;
 
